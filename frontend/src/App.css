@@ -1,0 +1,206 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  position: relative;
+  margin: 16px;
+  width: calc(100vw - 32px);
+  height: calc(100vh - 32px);
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel{
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+ul li {
+  margin: 10px 0;
+}
+
+a {
+  text-decoration: none;
+  color: #1890ff;
+  font-weight: bold;
+}
+
+a:hover {
+  color: #40a9ff;
+}
+
+.game-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.game-room {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin: 10px;
+  width: 45%;
+  text-align: center;
+  border-radius: 8px;
+  background-color: #fafafa;
+  cursor: pointer;
+}
+
+.game-room:hover {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+}
+
+form div {
+  margin-bottom: 15px;
+}
+
+form label {
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+form input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+form button:hover {
+  background-color: #40a9ff;
+}
+
+.chat {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.chat-messages {
+  border: 1px solid #ccc;
+  padding: 10px;
+  height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  background-color: #fafafa;
+}
+
+.chat input, .chat button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.chat button {
+  background-color: #1890ff;
+  color: white;
+  cursor: pointer;
+}
+
+.chat button:hover {
+  background-color: #40a9ff;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.card {
+  border: 1px solid #ccc;
+  padding: 20px;
+  text-align: center;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.teams-panel {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.team-info {
+  width: 20%;
+  padding: 10px;
+  text-align: center;
+  border-radius: 8px;
+  background-color: #fafafa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.team-info.red { background-color: #ffcccc; }
+.team-info.green { background-color: #ccffcc; }
+.team-info.blue { background-color: #ccccff; }
+
+.auth-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 250px;
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form input {
+  margin-bottom: 10px;
+}
+
+.auth-form button {
+  margin-bottom: 10px;
+}
