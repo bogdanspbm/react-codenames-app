@@ -1,4 +1,4 @@
-package com.emkn.backend.repository;
+package com.emkn.backend.repository.user;
 
 import com.emkn.backend.model.UserDTO;
 

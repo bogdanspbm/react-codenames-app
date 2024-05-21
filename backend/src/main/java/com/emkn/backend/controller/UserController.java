@@ -2,7 +2,7 @@ package com.emkn.backend.controller;
 
 import com.emkn.backend.auth.JWTTokenProvider;
 import com.emkn.backend.model.UserDTO;
-import com.emkn.backend.repository.UserRepository;
+import com.emkn.backend.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

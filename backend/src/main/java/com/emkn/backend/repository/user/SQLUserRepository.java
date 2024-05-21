@@ -1,4 +1,4 @@
-package com.emkn.backend.repository;
+package com.emkn.backend.repository.user;
 
 import com.emkn.backend.datastore.DataStore;
 import com.emkn.backend.datastore.SQLDataStore;
@@ -15,7 +15,7 @@ public class SQLUserRepository implements UserRepository {
     private DataStore dataStore;
 
     public SQLUserRepository() {
-        dataStore = SQLDataStore.createDataStore("jdbc:sqlite:database.sqlite");
+        dataStore = SQLDataStore.getDatastore("jdbc:sqlite:database.sqlite");
     }
 
     public SQLUserRepository(SQLDataStore dataStore) {

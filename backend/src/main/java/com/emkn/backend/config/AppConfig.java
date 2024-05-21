@@ -1,6 +1,6 @@
 package com.emkn.backend.config;
 
-import com.emkn.backend.repository.SQLUserRepository;
+import com.emkn.backend.repository.user.SQLUserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
