@@ -123,6 +123,8 @@ public class InMemoryRoomRepository implements RoomRepository {
             return;
         }
 
+        room.getReadyStatus().put(userName, isReady);
+
 
         List<String> membersList  = new ArrayList<>();
         room.getTeams().forEach(team -> team.getMembers().forEach((username, member) -> membersList.add(member.getUsername())));
