@@ -1,3 +1,4 @@
+/* Общие стили для всего приложения */
 body {
   font-family: Arial, sans-serif;
   background-color: #f0f2f5;
@@ -90,7 +91,7 @@ form label {
   color: #333;
 }
 
-form input, form select {
+form input {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
@@ -116,32 +117,43 @@ form button:hover {
 .chat {
   margin-top: 20px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.chat-messages {
+.chat-window {
   border: 1px solid #ccc;
   padding: 10px;
-  height: 200px;
+  height: 300px;
   overflow-y: auto;
   margin-bottom: 10px;
   border-radius: 4px;
   background-color: #fafafa;
 }
 
-.chat input, .chat button {
+.chat-input {
+  display: flex;
+}
+
+.chat-input input {
+  flex: 1;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
+  margin-right: 10px;
 }
 
-.chat button {
+.chat-input button {
+  padding: 10px;
   background-color: #1890ff;
   color: white;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
 }
 
-.chat button:hover {
+.chat-input button:hover {
   background-color: #40a9ff;
 }
 
@@ -161,6 +173,13 @@ form button:hover {
   background-color: #fafafa;
 }
 
+.teams-panel {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
 .team-info {
   width: 20%;
   padding: 10px;
@@ -170,11 +189,16 @@ form button:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.teams-panel {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  margin-bottom: 20px;
+.team-info.red {
+  background-color: #ffcccc;
+}
+
+.team-info.green {
+  background-color: #ccffcc;
+}
+
+.team-info.blue {
+  background-color: #ccccff;
 }
 
 .auth-container {
