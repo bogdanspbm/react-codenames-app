@@ -64,6 +64,7 @@ const Chat = ({ roomId, inMessages = [] }) => {
     const handleSend = () => {
         const token = Cookies.get('token');
         if (input.trim() && token && client && client.connected) {
+            console.log(roomId);
             const message = { content: input, roomId: roomId };
             client.publish({
                 destination: '/app/chat',

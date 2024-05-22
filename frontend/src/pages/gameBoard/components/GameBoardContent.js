@@ -1,32 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import Chat from './Chat';
+import axios from 'axios';
 import Cookies from 'js-cookie';
+import GameGrid from './GameGrid';
+import Chat from './Chat';
+import TeamPanel from './TeamPanel';
+import ReadyButton from './ReadyButton';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 const GameBoardContent = () => {
     const { id } = useParams();
     const [room, setRoom] = useState(null);
-    const [client, setClient] = useState(null);
+    const token = Cookies.get('token');
 
     useEffect(() => {
         const fetchRoom = async () => {
-            const token = Cookies.get('token');
-            if (token) {
-                const response = await fetch(`/api/v1/private/rooms/${id}/connect`, {
-                    method: 'POST',
+            try {
+                const response = await axios.get(`/api/v1/private/rooms/${id}`, {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
+                        Authorization: `Bearer ${token}`
+                    }
                 });
-                if (response.ok) {
-                    const data = await response.json();
-                    setRoom(data);
-                } else {
-                    console.error('Failed to connect to room');
-                }
+                setRoom(response.data);
+            } catch (error) {
+                console.error('Error fetching room:', error);
             }
         };
 
@@ -39,8 +37,10 @@ const GameBoardContent = () => {
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
             onConnect: () => {
-                console.log('Connected to WebSocket server');
-                const token = Cookies.get('token');
+                stompClient.subscribe(`/topic/room/${id}`, (message) => {
+                    const updatedRoom = JSON.parse(message.body);
+                    setRoom(updatedRoom);
+                });
                 if (token) {
                     stompClient.publish({
                         destination: `/app/connect`,
@@ -48,10 +48,6 @@ const GameBoardContent = () => {
                         headers: { Authorization: `Bearer ${token}` },
                     });
                 }
-                stompClient.subscribe(`/topic/room/${id}`, (message) => {
-                    const updatedRoom = JSON.parse(message.body);
-                    setRoom(updatedRoom);
-                });
             },
             onStompError: (frame) => {
                 console.error('Broker reported error: ' + frame.headers['message']);
@@ -63,11 +59,9 @@ const GameBoardContent = () => {
         });
 
         stompClient.activate();
-        setClient(stompClient);
 
         return () => {
             if (stompClient.connected) {
-                const token = Cookies.get('token');
                 if (token) {
                     stompClient.publish({
                         destination: `/app/disconnect`,
@@ -78,91 +72,29 @@ const GameBoardContent = () => {
             }
             stompClient.deactivate();
         };
-    }, [id]);
+    }, [id, token]);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const token = Cookies.get('token');
-            if (client && client.connected && token) {
-                client.publish({
-                    destination: `/app/ping`,
-                    body: JSON.stringify({ roomId: id }),
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-            }
-        }, 10000);
-
-        return () => clearInterval(interval);
-    }, [client, id]);
-
-    if (!room) return <div>Loading...</div>;
-
-    const handleJoinTeam = async (teamId) => {
-        const token = Cookies.get('token');
-        if (token) {
-            const response = await fetch(`/api/v1/private/rooms/${id}/join?teamId=${teamId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setRoom(data);
-            } else {
-                console.error('Failed to join team');
-            }
-        }
+    const handleJoinTeam = (teamId) => {
+        axios.post(`/api/v1/private/rooms/${id}/join`, {}, {
+            params: { teamId },
+            headers: { Authorization: `Bearer ${token}` },
+        }).then(response => {
+            setRoom(response.data);
+        }).catch(error => {
+            console.error('Error joining team:', error);
+        });
     };
 
-    const handleSetReady = async (isReady) => {
-        const token = Cookies.get('token');
-        if (token) {
-            const response = await fetch(`/api/v1/private/rooms/${id}/ready?ready=${isReady}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setRoom(data);
-            } else {
-                console.error('Failed to set ready status');
-            }
-        }
-    };
+    if (!room) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="game-board">
-            <h1>{room.name}</h1>
-            <div className="teams-panel">
-                {room.teams.map((team) => (
-                    <div key={team.id} className="team-info">
-                        <h2>{team.name}</h2>
-                        <ul>
-                            {Object.values(team.members).map((member) => (
-                                <li key={member.id}>{member.username}</li>
-                            ))}
-                        </ul>
-                        <button onClick={() => handleJoinTeam(team.id)}>Join Team</button>
-                    </div>
-                ))}
-                <div className="team-info">
-                    <h2>Spectators</h2>
-                    <ul>
-                        {Object.values(room.spectators).map((spectator) => (
-                            <li key={spectator.id}>{spectator.username}</li>
-                        ))}
-                    </ul>
-                    <button onClick={() => handleJoinTeam(-1)}>Join Spectators</button>
-                </div>
-            </div>
-            <button onClick={() => handleSetReady(true)}>Ready</button>
-            <button onClick={() => handleSetReady(false)}>Not Ready</button>
-            <Chat roomId={room.id} inMessages={room.chatHistory} />
+            <TeamPanel teams={room.teams} spectators={room.spectators} onJoinTeam={handleJoinTeam} />
+            <GameGrid words={room.words} />
+            <ReadyButton roomId={id} />
+            <Chat roomId={id} inMessages={room.chatHistory} />
         </div>
     );
 };

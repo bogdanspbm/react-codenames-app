@@ -44,28 +44,25 @@ public class InMemoryRoomRepository implements RoomRepository {
     @Override
     public RoomDTO getRoomById(int id) {
         RoomDTO roomDTO = rooms.get(id);
-        if (roomDTO == null) {
-            return null;
-        }
+        if (roomDTO != null) {
+            if (roomDTO.getWords() == null || roomDTO.getWords().isEmpty()) {
+                generateWordsForRoom(roomDTO);
+            }
 
-        if (roomDTO.getWords() == null || roomDTO.getWords().isEmpty()) {
-            generateWordsForRoom(roomDTO);
-        }
-
-        if (roomDTO.getTeams() == null || roomDTO.getTeams().isEmpty()) {
-            generateTeamsForRoom(roomDTO);
-        } else {
-            for (TeamDTO team : roomDTO.getTeams()) {
-                if (team.getMembers() == null) {
-                    team.setMembers(new HashMap<>());
+            if (roomDTO.getTeams() == null || roomDTO.getTeams().isEmpty()) {
+                generateTeamsForRoom(roomDTO);
+            } else {
+                for (TeamDTO team : roomDTO.getTeams()) {
+                    if (team.getMembers() == null) {
+                        team.setMembers(new HashMap<>());
+                    }
                 }
             }
-        }
 
-        if (roomDTO.getSpectators() == null) {
-            roomDTO.setSpectators(new HashMap<>());
+            if (roomDTO.getSpectators() == null) {
+                roomDTO.setSpectators(new HashMap<>());
+            }
         }
-
         return roomDTO;
     }
 
@@ -85,49 +82,46 @@ public class InMemoryRoomRepository implements RoomRepository {
     @Override
     public void joinTeam(int roomId, UserDTO user, int teamId) {
         RoomDTO room = rooms.get(roomId);
-        if (room == null || room.isStarted()) {
-            return;
-        }
-
-        for (TeamDTO team : room.getTeams()) {
-            team.getMembers().remove(user.getUsername());
-            if (team.getId() == teamId) {
-                team.getMembers().put(user.getUsername(), user);
-                if (team.getOwner() == null) {
-                    team.setOwner(user);
+        if (room != null && !room.isStarted()) {
+            for (TeamDTO team : room.getTeams()) {
+                team.getMembers().remove(user.getUsername());
+                if (team.getId() == teamId) {
+                    team.getMembers().put(user.getUsername(), user);
+                    if (team.getOwner() == null) {
+                        team.setOwner(user);
+                    }
                 }
             }
-        }
-
-        if (teamId == -1) {
-            room.getSpectators().put(user.getUsername(), user);
-        } else {
-            room.getSpectators().remove(user.getUsername());
+            if (teamId == -1) {
+                room.getSpectators().put(user.getUsername(), user);
+            } else {
+                room.getSpectators().remove(user.getUsername());
+            }
         }
     }
 
     @Override
     public void setReadyStatus(int roomId, int userId, boolean isReady) {
         RoomDTO room = rooms.get(roomId);
-        if (room == null || room.isStarted()) {
-            return;
-        }
-
-        room.getReadyStatus().put(userId, isReady);
-        if (room.getReadyStatus().values().stream().allMatch(Boolean::booleanValue)) {
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    room.setStarted(true);
-                }
-            }, 5000);
+        if (room != null && !room.isStarted()) {
+            room.getReadyStatus().put(userId, isReady);
+            if (room.getTeams().stream()
+                    .flatMap(team -> team.getMembers().values().stream())
+                    .allMatch(member -> room.getReadyStatus().getOrDefault(member.getId(), false))) {
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        room.setStarted(true);
+                    }
+                }, 5000);
+            }
         }
     }
 
     @Override
     public void connectUser(int roomId, UserDTO user) {
         RoomDTO room = rooms.get(roomId);
-        if (room != null) {
+        if (room != null && !room.isStarted()) {
             room.getSpectators().put(user.getUsername(), user);
         }
     }
@@ -135,33 +129,17 @@ public class InMemoryRoomRepository implements RoomRepository {
     @Override
     public void disconnectUser(int roomId, int userId) {
         RoomDTO room = rooms.get(roomId);
-        if (room == null) {
-            return;
-        }
-
-        if (!room.isStarted()) {
-            disconnectUserById(room, userId);
-        } else {
-            UserDTO user = findUserById(room, userId);
-            if (user != null && room.getSpectators().containsKey(user.getUsername())) {
-                room.getSpectators().remove(user.getUsername());
-            }
+        if (room != null && !room.isStarted()) {
+            room.getTeams().forEach(team -> team.getMembers().values().removeIf(member -> member.getId() == userId));
+            room.getSpectators().values().removeIf(spectator -> spectator.getId() == userId);
         }
     }
 
     @Override
     public void disconnectUser(int roomId, String username) {
         RoomDTO room = rooms.get(roomId);
-        if (room == null) {
-            return;
-        }
-
-        if (!room.isStarted()) {
-            room.getSpectators().remove(username);
-            for (TeamDTO team : room.getTeams()) {
-                team.getMembers().remove(username);
-            }
-        } else if (room.getSpectators().containsKey(username)) {
+        if (room != null && !room.isStarted()) {
+            room.getTeams().forEach(team -> team.getMembers().remove(username));
             room.getSpectators().remove(username);
         }
     }
@@ -208,34 +186,6 @@ public class InMemoryRoomRepository implements RoomRepository {
     private void assignWordsToTeams(List<WordDTO> words, int teamCount) {
         for (int i = 0; i < words.size(); i++) {
             words.get(i).setTeamIndex(i % teamCount);
-        }
-    }
-
-    private UserDTO findUserById(RoomDTO room, int userId) {
-        for (TeamDTO team : room.getTeams()) {
-            for (UserDTO user : team.getMembers().values()) {
-                if (user.getId() == userId) {
-                    return user;
-                }
-            }
-        }
-
-        for (UserDTO user : room.getSpectators().values()) {
-            if (user.getId() == userId) {
-                return user;
-            }
-        }
-
-        return null;
-    }
-
-    private void disconnectUserById(RoomDTO room, int userId) {
-        UserDTO user = findUserById(room, userId);
-        if (user != null) {
-            room.getSpectators().remove(user.getUsername());
-            for (TeamDTO team : room.getTeams()) {
-                team.getMembers().remove(user.getUsername());
-            }
         }
     }
 }

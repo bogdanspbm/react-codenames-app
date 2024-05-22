@@ -1,14 +1,16 @@
 import React from 'react';
 
-function TeamInfo({ team, onJoinTeam }) {
+const TeamInfo = ({ team }) => {
     return (
-        <div className="team-info">
-            <h3>{team.name}</h3>
-            <p>Owner: {team.owner ? team.owner.username : "None"}</p>
-            <p>Members: {Object.values(team.members).map(member => member.username).join(', ')}</p>
-            <button onClick={() => onJoinTeam(team.id)}>Join</button>
+        <div className={`team-info team-${team.id}`}>
+            <h2>{team.name}</h2>
+            <ul>
+                {Object.values(team.members).map((member) => (
+                    <li key={member.id}>{member.username}</li>
+                ))}
+            </ul>
         </div>
     );
-}
+};
 
 export default TeamInfo;

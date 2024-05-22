@@ -3,6 +3,7 @@ package com.emkn.backend.controller;
 import com.emkn.backend.auth.JWTTokenProvider;
 import com.emkn.backend.model.ChatMessageDTO;
 import com.emkn.backend.model.RoomDTO;
+import com.emkn.backend.model.UserPingDTO;
 import com.emkn.backend.repository.room.RoomRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,14 @@ public class WebSocketRoomController {
             messagingTemplate.convertAndSend("/topic/messages", message);
         } else {
             logger.warn("Invalid token for message: {}", message);
+        }
+    }
+
+    @MessageMapping("/ping")
+    public void pingUser(@Payload UserPingDTO userPing, @Header("Authorization") String token) {
+        if (JWTTokenProvider.validateToken(token.substring(7))) {
+            userPing.setUsername(JWTTokenProvider.getUsernameFromToken(token.substring(7)));
+            roomRepository.pingUser(userPing);
         }
     }
 }
