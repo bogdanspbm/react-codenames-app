@@ -119,20 +119,23 @@ public class InMemoryRoomRepository implements RoomRepository {
     @Override
     public void setReadyStatus(int roomId, String userName, boolean isReady) {
         RoomDTO room = rooms.get(roomId);
-        if (room != null && !room.isStarted()) {
-            room.getReadyStatus().put(userName, isReady);
-            if (room.getTeams().stream()
-                    .mapToLong(team -> team.getMembers().values().size()).sum() > 0 && room.getTeams().stream()
-                    .flatMap(team -> team.getMembers().values().stream())
-                    .allMatch(member -> room.getReadyStatus().getOrDefault(member.getId(), false))) {
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        logger.info("[SetReadyStatus] RoomID: " + roomId + " is ready!");
-                        room.setStarted(true);
-                    }
-                }, 5000);
+        if (room == null || room.isStarted()) {
+            return;
+        }
+
+
+        List<String> membersList  = new ArrayList<>();
+        room.getTeams().forEach(team -> team.getMembers().forEach((username, member) -> membersList.add(member.getUsername())));
+
+        int counter = 0;
+        for(String member : membersList){
+            if(room.getReadyStatus().containsKey(member) && room.getReadyStatus().get(member)){
+                counter += 1;
             }
+        }
+
+        if(counter == membersList.size()){
+            room.setStarted(true);
         }
     }
 

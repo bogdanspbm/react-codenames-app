@@ -2,7 +2,7 @@ import React from 'react';
 import TeamInfo from "./TeamInfo";
 
 const TeamPanel = ({teams, spectators, onJoinTeam}) => {
-    
+
     return <div className="teams-panel">
         {
             teams.map(team => (<TeamInfo key={team.id} inTeam={team} onJoinTeam={onJoinTeam}/>))
