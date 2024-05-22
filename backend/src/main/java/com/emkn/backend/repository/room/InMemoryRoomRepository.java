@@ -1,8 +1,11 @@
 package com.emkn.backend.repository.room;
 
+import com.emkn.backend.controller.WebSocketRoomController;
 import com.emkn.backend.model.*;
 import com.emkn.backend.repository.word.SQLWordRepository;
 import com.emkn.backend.repository.word.WordRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
@@ -11,6 +14,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class InMemoryRoomRepository implements RoomRepository {
+
+
+    private static final Logger logger = LoggerFactory.getLogger(WebSocketRoomController.class);
 
     private static RoomRepository repository;
 
@@ -106,11 +112,13 @@ public class InMemoryRoomRepository implements RoomRepository {
         if (room != null && !room.isStarted()) {
             room.getReadyStatus().put(userName, isReady);
             if (room.getTeams().stream()
+                    .mapToLong(team -> team.getMembers().values().size()).sum() > 0 && room.getTeams().stream()
                     .flatMap(team -> team.getMembers().values().stream())
                     .allMatch(member -> room.getReadyStatus().getOrDefault(member.getId(), false))) {
                 new Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
+                        logger.info("[SetReadyStatus] RoomID: " + roomId + " is ready!");
                         room.setStarted(true);
                     }
                 }, 5000);

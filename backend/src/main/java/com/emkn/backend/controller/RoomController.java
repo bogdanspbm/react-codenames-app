@@ -4,6 +4,8 @@ import com.emkn.backend.auth.JWTTokenProvider;
 import com.emkn.backend.model.RoomDTO;
 import com.emkn.backend.model.UserDTO;
 import com.emkn.backend.repository.room.RoomRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,9 @@ import java.util.TimerTask;
 @RestController
 @RequestMapping("/api/v1")
 public class RoomController {
+
+    private static final Logger logger = LoggerFactory.getLogger(WebSocketRoomController.class);
+
 
     private final RoomRepository roomRepository;
     private final SimpMessagingTemplate messagingTemplate;
@@ -54,6 +59,10 @@ public class RoomController {
     @PostMapping("/private/rooms/{id}/join")
     public RoomDTO joinTeam(@PathVariable int id, @RequestParam int teamId, HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization");
+
+
+        logger.info("[Join] Room: " + id + ", Team ID: " + teamId + ", Token: " + token);
+
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             int userId = JWTTokenProvider.getUserIDFromToken(token.substring(7));
             String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
@@ -74,6 +83,10 @@ public class RoomController {
     @PostMapping("/private/rooms/{id}/ready")
     public RoomDTO setReadyStatus(@PathVariable int id, @RequestParam boolean ready, HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization");
+
+        logger.info("[Ready] Room: " + id + ", Token: " + token);
+
+
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             int userId = JWTTokenProvider.getUserIDFromToken(token.substring(7));
             String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
@@ -113,6 +126,10 @@ public class RoomController {
     @PostMapping("/private/rooms/{id}/connect")
     public RoomDTO connectUser(@PathVariable int id, HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization");
+
+        logger.info("[Connect] Room: " + id + ", Token: " + token);
+
+
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             int userId = JWTTokenProvider.getUserIDFromToken(token.substring(7));
             String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
@@ -130,6 +147,9 @@ public class RoomController {
     @PostMapping("/private/rooms/{id}/disconnect")
     public RoomDTO disconnectUser(@PathVariable int id, HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization");
+
+        logger.info("[Disconnect] Room: " + id + ", Token: " + token);
+
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             int userId = JWTTokenProvider.getUserIDFromToken(token.substring(7));
             roomRepository.disconnectUser(id, userId);

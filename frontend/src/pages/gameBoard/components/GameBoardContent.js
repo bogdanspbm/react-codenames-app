@@ -39,6 +39,7 @@ const GameBoardContent = () => {
             onConnect: () => {
                 stompClient.subscribe(`/topic/room/${id}`, (message) => {
                     const updatedRoom = JSON.parse(message.body);
+                    console.log(updatedRoom);
                     setRoom(updatedRoom);
                 });
                 if (token) {
