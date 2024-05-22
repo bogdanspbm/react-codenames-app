@@ -61,7 +61,7 @@ public class RoomController {
             user.setId(userId);
             user.setUsername(username);
             roomRepository.joinTeam(id, user, teamId);
-            roomRepository.setReadyStatus(id, userId, false); // Reset ready status when changing team
+            roomRepository.setReadyStatus(id, username, false); // Reset ready status when changing team
             RoomDTO room = roomRepository.getRoomById(id);
             messagingTemplate.convertAndSend("/topic/room/" + id, room);
             return room;
@@ -76,7 +76,8 @@ public class RoomController {
         String token = request.getHeader("Authorization");
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             int userId = JWTTokenProvider.getUserIDFromToken(token.substring(7));
-            roomRepository.setReadyStatus(id, userId, ready);
+            String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
+            roomRepository.setReadyStatus(id, username, ready);
             RoomDTO room = roomRepository.getRoomById(id);
             messagingTemplate.convertAndSend("/topic/room/" + id, room);
 

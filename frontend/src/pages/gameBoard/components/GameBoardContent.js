@@ -93,7 +93,7 @@ const GameBoardContent = () => {
         <div className="game-board">
             <TeamPanel teams={room.teams} spectators={room.spectators} onJoinTeam={handleJoinTeam} />
             <GameGrid words={room.words} />
-            <ReadyButton roomId={id} />
+            <ReadyButton room={room} />
             <Chat roomId={id} inMessages={room.chatHistory} />
         </div>
     );

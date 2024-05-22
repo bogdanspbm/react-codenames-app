@@ -16,7 +16,7 @@ public interface RoomRepository {
 
     void deleteRoomByUserId(int userId);
 
-    void setReadyStatus(int roomId, int userId, boolean isReady);
+     void setReadyStatus(int roomId, String userName, boolean isReady);
 
     void joinTeam(int roomId, UserDTO user, int teamId);
 

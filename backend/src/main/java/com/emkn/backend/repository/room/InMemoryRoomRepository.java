@@ -101,10 +101,10 @@ public class InMemoryRoomRepository implements RoomRepository {
     }
 
     @Override
-    public void setReadyStatus(int roomId, int userId, boolean isReady) {
+    public void setReadyStatus(int roomId, String userName, boolean isReady) {
         RoomDTO room = rooms.get(roomId);
         if (room != null && !room.isStarted()) {
-            room.getReadyStatus().put(userId, isReady);
+            room.getReadyStatus().put(userName, isReady);
             if (room.getTeams().stream()
                     .flatMap(team -> team.getMembers().values().stream())
                     .allMatch(member -> room.getReadyStatus().getOrDefault(member.getId(), false))) {

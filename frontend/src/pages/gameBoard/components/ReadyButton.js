@@ -2,42 +2,65 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const ReadyButton = ({ roomId }) => {
+const ReadyButton = ({ room = {}}) => {
     const [isReady, setIsReady] = useState(false);
-    const [readyCount, setReadyCount] = useState(0);
     const token = Cookies.get('token');
 
     useEffect(() => {
         const fetchRoom = async () => {
             try {
-                const response = await axios.get(`/api/v1/private/rooms/${roomId}`, {
+                const response = await axios.get(`/api/v1/private/rooms/${room.id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                const room = response.data;
-                const readyUsers = Object.values(room.readyStatus).filter(status => status).length;
-                setReadyCount(readyUsers);
+                const readyUsers = Object.values(response.data.readyStatus).filter(status => status).length;
             } catch (error) {
                 console.error('Error fetching room:', error);
             }
         };
 
         fetchRoom();
-    }, [roomId, token, isReady]);
+    }, [room.id, token, isReady]);
 
     const handleReadyClick = () => {
-        axios.post(`/api/v1/private/rooms/${roomId}/ready`, {}, {
+        axios.post(`/api/v1/private/rooms/${room.id}/ready`, {}, {
             params: { ready: !isReady },
             headers: { Authorization: `Bearer ${token}` },
         }).then(response => {
-            setIsReady(!isReady);
             const room = response.data;
-            const readyUsers = Object.values(room.readyStatus).filter(status => status).length;
-            setReadyCount(readyUsers);
+            setIsReady(!isReady);
         }).catch(error => {
             console.error('Error setting ready status:', error);
         });
+    };
+
+    const calcReadyCount = () => {
+        const membersList = [];
+
+
+        for(let teamIndex in room.teams){
+
+            const team = room.teams[teamIndex];
+
+            for(let memberIndex in team.members){
+                const member = team.members[memberIndex];
+                membersList.push(member.username);
+            }
+        }
+
+        let counter = 0;
+
+        for(let memberIndex in membersList){
+            const member = membersList[memberIndex];
+            if(!room.readyStatus[member]){
+                continue;
+            }
+
+            counter += 1;
+        }
+
+        return `${counter}/${membersList.length}`;
     };
 
     return (
@@ -45,7 +68,7 @@ const ReadyButton = ({ roomId }) => {
             <button onClick={handleReadyClick}>
                 {isReady ? 'Cancel Ready' : 'Ready'}
             </button>
-            <p>{readyCount} players ready</p>
+            <p>{calcReadyCount()} players ready</p>
         </div>
     );
 };

@@ -3,6 +3,7 @@ package com.emkn.backend.controller;
 import com.emkn.backend.auth.JWTTokenProvider;
 import com.emkn.backend.model.ChatMessageDTO;
 import com.emkn.backend.model.RoomDTO;
+import com.emkn.backend.model.RoomReadyDTO;
 import com.emkn.backend.model.UserPingDTO;
 import com.emkn.backend.repository.room.RoomRepository;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -29,23 +31,30 @@ public class WebSocketRoomController {
     }
 
     @MessageMapping("/chat")
-    public void sendMessage(@Payload ChatMessageDTO message, @Header("Authorization") String token) {
+    @SendTo("/topic/messages")
+    public ChatMessageDTO sendMessage(@Payload ChatMessageDTO message, @Header("Authorization") String token) {
         logger.info("Received message: {}", message);
-        if (JWTTokenProvider.validateToken(token.substring(7))) {
-            String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
+        if (JWTTokenProvider.validateToken(token)) {
+            String username = JWTTokenProvider.getUsernameFromToken(token);
             message.setSender(username);
             roomRepository.addChatMessage(message.getRoomId(), message);
-            messagingTemplate.convertAndSend("/topic/messages", message);
+            return message;
         } else {
             logger.warn("Invalid token for message: {}", message);
+            return null;
         }
     }
 
-    @MessageMapping("/ping")
-    public void pingUser(@Payload UserPingDTO userPing, @Header("Authorization") String token) {
-        if (JWTTokenProvider.validateToken(token.substring(7))) {
-            userPing.setUsername(JWTTokenProvider.getUsernameFromToken(token.substring(7)));
-            roomRepository.pingUser(userPing);
+    @MessageMapping("/ready")
+    public void setReadyStatus(@Payload RoomReadyDTO roomReadyDTO, @Header("Authorization") String token) {
+        logger.info("Received ready status: {}", roomReadyDTO);
+        if (JWTTokenProvider.validateToken(token)) {
+            String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
+            roomRepository.setReadyStatus(roomReadyDTO.getRoomId(), username, roomReadyDTO.isReady());
+            RoomDTO room = roomRepository.getRoomById(roomReadyDTO.getRoomId());
+            messagingTemplate.convertAndSend("/topic/room/" + roomReadyDTO.getRoomId(), room);
+        } else {
+            logger.warn("Invalid token for ready status: {}", roomReadyDTO);
         }
     }
 }

@@ -13,7 +13,7 @@ public class RoomDTO {
     private List<WordDTO> words = new ArrayList<>();
     private List<TeamDTO> teams = new ArrayList<>();
     private boolean started = false;
-    private Map<Integer, Boolean> readyStatus = new HashMap<>();
+    private Map<String, Boolean> readyStatus = new HashMap<>();
     private Map<String, UserDTO> spectators = new HashMap<>();
     private List<ChatMessageDTO> chatHistory = new ArrayList<>(); // Новое поле для истории чата
 
@@ -75,11 +75,11 @@ public class RoomDTO {
         this.started = started;
     }
 
-    public Map<Integer, Boolean> getReadyStatus() {
+    public Map<String, Boolean> getReadyStatus() {
         return readyStatus;
     }
 
-    public void setReadyStatus(Map<Integer, Boolean> readyStatus) {
+    public void setReadyStatus(Map<String, Boolean> readyStatus) {
         this.readyStatus = readyStatus;
     }
 
