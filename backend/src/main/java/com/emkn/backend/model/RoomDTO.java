@@ -1,6 +1,5 @@
 package com.emkn.backend.model;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,13 +12,12 @@ public class RoomDTO {
     private String language = "Russian";
     private List<WordDTO> words = new ArrayList<>();
     private List<TeamDTO> teams = new ArrayList<>();
-
     private boolean started = false;
     private Map<Integer, Boolean> readyStatus = new HashMap<>();
-
     private Map<String, UserDTO> spectators = new HashMap<>();
+    private List<ChatMessageDTO> chatHistory = new ArrayList<>(); // Новое поле для истории чата
 
-
+    // Getters and Setters
 
     public int getId() {
         return id;
@@ -93,7 +91,15 @@ public class RoomDTO {
         this.spectators = spectators;
     }
 
-    public static Map<Integer, RoomDTO> generateTemplates(){
+    public List<ChatMessageDTO> getChatHistory() {
+        return chatHistory;
+    }
+
+    public void setChatHistory(List<ChatMessageDTO> chatHistory) {
+        this.chatHistory = chatHistory;
+    }
+
+    public static Map<Integer, RoomDTO> generateTemplates() {
         Map<Integer, RoomDTO> output = new HashMap<>();
 
         RoomDTO roomA = new RoomDTO();

@@ -31,7 +31,9 @@ function GameBoardContent() {
                         throw new Error('Failed to connect to room');
                     }
                 })
-                .then(data => setRoom(data))
+                .then(data => {
+                    console.log(data);
+                    setRoom(data);})
                 .catch(error => console.error('Error:', error));
         }
 
@@ -91,7 +93,7 @@ function GameBoardContent() {
                     <Card key={index} word={word.word} teamIndex={word.teamIndex} />
                 ))}
             </div>
-            <Chat />
+            <Chat roomId={room.id} inMessages={room.chatHistory}/>
             {!room.started && <button onClick={() => handleReady(true)}>Ready</button>}
             <button type="button" onClick={() => navigate(-1)}>Back</button>
         </>

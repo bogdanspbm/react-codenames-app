@@ -1,5 +1,6 @@
 package com.emkn.backend.repository.room;
 
+import com.emkn.backend.model.ChatMessageDTO;
 import com.emkn.backend.model.RoomDTO;
 import com.emkn.backend.model.UserDTO;
 
@@ -21,4 +22,6 @@ public interface RoomRepository {
     void connectUser(int roomId, UserDTO user);
 
     void disconnectUser(int roomId, int userId);
+
+    void addChatMessage(int roomId, ChatMessageDTO message);
 }

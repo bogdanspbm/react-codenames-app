@@ -1,6 +1,7 @@
 package com.emkn.backend.controller;
 
 import com.emkn.backend.auth.JWTTokenProvider;
+import com.emkn.backend.model.ChatMessageDTO;
 import com.emkn.backend.model.RoomDTO;
 import com.emkn.backend.model.UserDTO;
 import com.emkn.backend.repository.room.InMemoryRoomRepository;
@@ -16,7 +17,7 @@ import java.util.List;
 @RequestMapping("/api/v1")
 public class RoomController {
 
-    private final RoomRepository roomRepository = new InMemoryRoomRepository();
+    private final RoomRepository roomRepository = InMemoryRoomRepository.getRoomRepository();
 
     @PostMapping("/private/rooms")
     public RoomDTO createRoom(@RequestBody RoomDTO roomDTO, HttpServletRequest request, HttpServletResponse response) {

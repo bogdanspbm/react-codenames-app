@@ -1,11 +1,15 @@
 package com.emkn.backend.repository.room;
 
+import com.emkn.backend.controller.WebSocketRoomController;
+import com.emkn.backend.model.ChatMessageDTO;
 import com.emkn.backend.model.RoomDTO;
 import com.emkn.backend.model.TeamDTO;
 import com.emkn.backend.model.UserDTO;
 import com.emkn.backend.model.WordDTO;
 import com.emkn.backend.repository.word.SQLWordRepository;
 import com.emkn.backend.repository.word.WordRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
@@ -14,9 +18,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Repository
 public class InMemoryRoomRepository implements RoomRepository {
 
+    private static RoomRepository repository;
+
+    public static RoomRepository getRoomRepository(){
+        if(repository == null){
+            repository = new InMemoryRoomRepository();
+        }
+
+        return repository;
+    }
+
     private Map<Integer, RoomDTO> rooms = RoomDTO.generateTemplates();
     private Map<Integer, Integer> userRooms = new HashMap<>();
     private AtomicInteger idCounter = new AtomicInteger();
+
     private WordRepository wordRepository = new SQLWordRepository();
 
     @Override
@@ -53,6 +68,10 @@ public class InMemoryRoomRepository implements RoomRepository {
             if (roomDTO.getSpectators() == null) {
                 roomDTO.setSpectators(new HashMap<>());
             }
+
+            if (roomDTO.getChatHistory() == null) {
+                roomDTO.setChatHistory(new ArrayList<>());
+            }
         }
         return roomDTO;
     }
@@ -66,10 +85,7 @@ public class InMemoryRoomRepository implements RoomRepository {
     public void deleteRoomByUserId(int userId) {
         Integer roomId = userRooms.remove(userId);
         if (roomId != null) {
-            RoomDTO room = rooms.get(roomId);
-            if (!room.isStarted() || room.getSpectators().containsKey(userId)) {
-                rooms.remove(roomId);
-            }
+            rooms.remove(roomId);
         }
     }
 
@@ -111,9 +127,17 @@ public class InMemoryRoomRepository implements RoomRepository {
     }
 
     @Override
+    public void addChatMessage(int roomId, ChatMessageDTO message) {
+        RoomDTO room = rooms.get(roomId);
+        if (room != null) {
+            room.getChatHistory().add(message);
+        }
+    }
+
+    @Override
     public void connectUser(int roomId, UserDTO user) {
         RoomDTO room = rooms.get(roomId);
-        if (room != null && !room.isStarted()) {
+        if (room != null) {
             room.getSpectators().put(user.getUsername(), user);
         }
     }
@@ -122,13 +146,9 @@ public class InMemoryRoomRepository implements RoomRepository {
     public void disconnectUser(int roomId, int userId) {
         RoomDTO room = rooms.get(roomId);
         if (room != null) {
-            if (!room.isStarted()) {
-                for (TeamDTO team : room.getTeams()) {
-                    team.getMembers().values().removeIf(member -> member.getId() == userId);
-                }
-                room.getSpectators().values().removeIf(spectator -> spectator.getId() == userId);
-            } else {
-                room.getSpectators().values().removeIf(spectator -> spectator.getId() == userId);
+            room.getSpectators().values().removeIf(user -> user.getId() == userId);
+            for (TeamDTO team : room.getTeams()) {
+                team.getMembers().values().removeIf(user -> user.getId() == userId);
             }
         }
     }

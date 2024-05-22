@@ -2,7 +2,7 @@ package com.emkn.backend.controller;
 
 import com.emkn.backend.auth.JWTTokenProvider;
 import com.emkn.backend.model.ChatMessageDTO;
-import com.emkn.backend.model.UserDTO;
+import com.emkn.backend.repository.room.InMemoryRoomRepository;
 import com.emkn.backend.repository.room.RoomRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +18,7 @@ public class WebSocketRoomController {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketRoomController.class);
 
-    private final RoomRepository roomRepository;
-
-    @Autowired
-    public WebSocketRoomController(RoomRepository roomRepository) {
-        this.roomRepository = roomRepository;
-    }
+    private final RoomRepository roomRepository = InMemoryRoomRepository.getRoomRepository();
 
     @MessageMapping("/chat")
     @SendTo("/topic/messages")
@@ -32,6 +27,7 @@ public class WebSocketRoomController {
         if (JWTTokenProvider.validateToken(token)) {
             String username = JWTTokenProvider.getUsernameFromToken(token);
             message.setSender(username);
+            roomRepository.addChatMessage(message.getRoomId(), message); // Сохранение сообщения в истории чата
             return message;
         } else {
             logger.warn("Invalid token for message: {}", message);
