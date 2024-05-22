@@ -126,7 +126,7 @@ public class InMemoryRoomRepository implements RoomRepository {
 
         room.getReadyStatus().put(userName, isReady);
 
-        List<String> membersList  = new ArrayList<>();
+        List<String> membersList = new ArrayList<>();
         room.getTeams().forEach(team -> team.getMembers().forEach((username, member) -> membersList.add(member.getUsername())));
 
         int counter = 0;
@@ -142,7 +142,6 @@ public class InMemoryRoomRepository implements RoomRepository {
             stopCountdown(roomId);
         }
     }
-
 
     private void startCountdown(int roomId, SimpMessagingTemplate messagingTemplate) {
         Timer timer = new Timer();
@@ -161,11 +160,72 @@ public class InMemoryRoomRepository implements RoomRepository {
                     if (room != null) {
                         room.setStarted(true);
                         messagingTemplate.convertAndSend("/topic/room/" + roomId, room);
+                        startTurn(roomId, messagingTemplate);
                     }
                     timer.cancel();
                 }
             }
         }, 0, 1000);
+    }
+
+    private void startTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
+        RoomDTO room = rooms.get(roomId);
+        if (room == null) return;
+
+        if (room.isOwnerTurn()) {
+            startOwnerTurn(roomId, messagingTemplate);
+        } else {
+            startMemberTurn(roomId, messagingTemplate);
+        }
+    }
+
+    private void startOwnerTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
+        Timer timer = new Timer();
+        countdownTimers.put(roomId, timer);
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                endOwnerTurn(roomId, messagingTemplate);
+            }
+        }, 60000); // 60 секунд для хода владельца команды
+
+        messagingTemplate.convertAndSend("/topic/turn/" + roomId, "owner");
+    }
+
+    private void endOwnerTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
+        stopCountdown(roomId);
+        RoomDTO room = rooms.get(roomId);
+        if (room == null) return;
+
+        room.setOwnerTurn(false);
+        messagingTemplate.convertAndSend("/topic/room/" + roomId, room);
+        startTurn(roomId, messagingTemplate);
+    }
+
+    private void startMemberTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
+        Timer timer = new Timer();
+        countdownTimers.put(roomId, timer);
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                endMemberTurn(roomId, messagingTemplate);
+            }
+        }, 60000); // 60 секунд для хода участников команды
+
+        messagingTemplate.convertAndSend("/topic/turn/" + roomId, "member");
+    }
+
+    private void endMemberTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
+        stopCountdown(roomId);
+        RoomDTO room = rooms.get(roomId);
+        if (room == null) return;
+
+        room.setOwnerTurn(true);
+        room.setCurrentTeamIndex((room.getCurrentTeamIndex() + 1) % room.getTeams().size());
+        messagingTemplate.convertAndSend("/topic/room/" + roomId, room);
+        startTurn(roomId, messagingTemplate);
     }
 
     private void stopCountdown(int roomId) {

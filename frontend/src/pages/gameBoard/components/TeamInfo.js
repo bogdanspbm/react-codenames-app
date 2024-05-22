@@ -1,6 +1,6 @@
 import React from 'react';
 
-const TeamInfo = ({ inTeam = null, onJoinTeam = () => {} }) => {
+const TeamInfo = ({ started = false, inTeam = null, onJoinTeam = () => {} }) => {
 
     if(inTeam === null){
         return <div></div>
@@ -14,8 +14,7 @@ const TeamInfo = ({ inTeam = null, onJoinTeam = () => {} }) => {
                     <li key={member.username}>{inTeam.owner.username === member.username ? `Owner ${member.username}` : member.username} </li>
                 ))}
             </ul>
-            <button className="team-button" onClick={() => onJoinTeam(inTeam.id)}>Join Team</button>
-
+            { !started ? <button className="team-button" onClick={() => onJoinTeam(inTeam.id)}>Join Team</button> : null}
         </div>
     );
 };
