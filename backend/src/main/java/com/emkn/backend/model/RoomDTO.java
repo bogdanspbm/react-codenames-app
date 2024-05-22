@@ -12,7 +12,7 @@ public class RoomDTO {
     private String language = "Russian";
     private List<WordDTO> words = new ArrayList<>();
     private List<TeamDTO> teams = new ArrayList<>();
-    private boolean started = false;
+    private boolean isStarted = false;
     private Map<String, Boolean> readyStatus = new HashMap<>();
     private Map<String, UserDTO> spectators = new HashMap<>();
     private List<ChatMessageDTO> chatHistory = new ArrayList<>(); // Новое поле для истории чата
@@ -68,11 +68,11 @@ public class RoomDTO {
     }
 
     public boolean isStarted() {
-        return started;
+        return isStarted;
     }
 
     public void setStarted(boolean started) {
-        this.started = started;
+        this.isStarted = started;
     }
 
     public Map<String, Boolean> getReadyStatus() {

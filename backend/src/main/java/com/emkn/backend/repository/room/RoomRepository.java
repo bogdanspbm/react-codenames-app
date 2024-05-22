@@ -4,6 +4,7 @@ import com.emkn.backend.model.ChatMessageDTO;
 import com.emkn.backend.model.RoomDTO;
 import com.emkn.backend.model.UserDTO;
 import com.emkn.backend.model.UserPingDTO;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface RoomRepository {
 
     void deleteRoomByUserId(int userId);
 
-     void setReadyStatus(int roomId, String userName, boolean isReady);
+     void setReadyStatus(int roomId, String userName, boolean isReady, SimpMessagingTemplate messagingTemplate);
 
     void joinTeam(int roomId, UserDTO user, int teamId);
 

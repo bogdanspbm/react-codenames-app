@@ -6,6 +6,7 @@ import com.emkn.backend.repository.word.SQLWordRepository;
 import com.emkn.backend.repository.word.WordRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class InMemoryRoomRepository implements RoomRepository {
-
+    private Map<Integer, Timer> countdownTimers = new ConcurrentHashMap<>();
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketRoomController.class);
 
@@ -117,7 +118,7 @@ public class InMemoryRoomRepository implements RoomRepository {
     }
 
     @Override
-    public void setReadyStatus(int roomId, String userName, boolean isReady) {
+    public void setReadyStatus(int roomId, String userName, boolean isReady, SimpMessagingTemplate messagingTemplate) {
         RoomDTO room = rooms.get(roomId);
         if (room == null || room.isStarted()) {
             return;
@@ -125,19 +126,52 @@ public class InMemoryRoomRepository implements RoomRepository {
 
         room.getReadyStatus().put(userName, isReady);
 
-
         List<String> membersList  = new ArrayList<>();
         room.getTeams().forEach(team -> team.getMembers().forEach((username, member) -> membersList.add(member.getUsername())));
 
         int counter = 0;
-        for(String member : membersList){
-            if(room.getReadyStatus().containsKey(member) && room.getReadyStatus().get(member)){
+        for (String member : membersList) {
+            if (room.getReadyStatus().containsKey(member) && room.getReadyStatus().get(member)) {
                 counter += 1;
             }
         }
 
-        if(counter == membersList.size()){
-            room.setStarted(true);
+        if (counter == membersList.size()) {
+            startCountdown(roomId, messagingTemplate);
+        } else {
+            stopCountdown(roomId);
+        }
+    }
+
+
+    private void startCountdown(int roomId, SimpMessagingTemplate messagingTemplate) {
+        Timer timer = new Timer();
+        countdownTimers.put(roomId, timer);
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            int countdown = 5;
+
+            @Override
+            public void run() {
+                if (countdown > 0) {
+                    messagingTemplate.convertAndSend("/topic/countdown/" + roomId, countdown);
+                    countdown--;
+                } else {
+                    RoomDTO room = rooms.get(roomId);
+                    if (room != null) {
+                        room.setStarted(true);
+                        messagingTemplate.convertAndSend("/topic/room/" + roomId, room);
+                    }
+                    timer.cancel();
+                }
+            }
+        }, 0, 1000);
+    }
+
+    private void stopCountdown(int roomId) {
+        Timer timer = countdownTimers.remove(roomId);
+        if (timer != null) {
+            timer.cancel();
         }
     }
 

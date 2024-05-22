@@ -12,6 +12,7 @@ import SockJS from 'sockjs-client';
 const GameBoardContent = () => {
     const { id } = useParams();
     const [room, setRoom] = useState(null);
+    const [countdown, setCountdown] = useState(null);
     const token = Cookies.get('token');
 
     useEffect(() => {
@@ -41,6 +42,10 @@ const GameBoardContent = () => {
                     const updatedRoom = JSON.parse(message.body);
                     console.log(updatedRoom);
                     setRoom(updatedRoom);
+                });
+                stompClient.subscribe(`/topic/countdown/${id}`, (message) => {
+                    const countdownValue = JSON.parse(message.body);
+                    setCountdown(countdownValue);
                 });
                 if (token) {
                     stompClient.publish({
@@ -96,6 +101,11 @@ const GameBoardContent = () => {
             <GameGrid words={room.words} />
             <ReadyButton room={room} />
             <Chat roomId={id} inMessages={room.chatHistory} />
+            {room.started ? (
+                <div className="game-status">Game Started</div>
+            ) : (
+                countdown !== null && <div className="countdown">Game starts in: {countdown}</div>
+            )}
         </div>
     );
 };

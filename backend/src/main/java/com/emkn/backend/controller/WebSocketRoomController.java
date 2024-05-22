@@ -50,7 +50,7 @@ public class WebSocketRoomController {
         logger.info("Received ready status: {}", roomReadyDTO);
         if (JWTTokenProvider.validateToken(token)) {
             String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
-            roomRepository.setReadyStatus(roomReadyDTO.getRoomId(), username, roomReadyDTO.isReady());
+            roomRepository.setReadyStatus(roomReadyDTO.getRoomId(), username, roomReadyDTO.isReady(), messagingTemplate);
             RoomDTO room = roomRepository.getRoomById(roomReadyDTO.getRoomId());
             messagingTemplate.convertAndSend("/topic/room/" + roomReadyDTO.getRoomId(), room);
         } else {
