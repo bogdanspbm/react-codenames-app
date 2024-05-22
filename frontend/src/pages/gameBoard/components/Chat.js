@@ -30,7 +30,7 @@ const Chat = ({ roomId, inMessages = [] }) => {
                     stompClient.publish({
                         destination: `/app/connect`,
                         body: JSON.stringify({ roomId }),
-                        headers: { Authorization: token },
+                        headers: { Authorization: `Bearer ${token}` },
                     });
                 }
             },
@@ -53,7 +53,7 @@ const Chat = ({ roomId, inMessages = [] }) => {
                     stompClient.publish({
                         destination: `/app/disconnect`,
                         body: JSON.stringify({ roomId }),
-                        headers: { Authorization: token },
+                        headers: { Authorization: `Bearer ${token}` },
                     });
                 }
             }
@@ -64,12 +64,11 @@ const Chat = ({ roomId, inMessages = [] }) => {
     const handleSend = () => {
         const token = Cookies.get('token');
         if (input.trim() && token && client && client.connected) {
-            console.log(roomId);
-            const message = { content: input, roomId: roomId }; // Ensure roomId is set correctly here
+            const message = { content: input, roomId: roomId };
             client.publish({
                 destination: '/app/chat',
                 body: JSON.stringify(message),
-                headers: { Authorization: token },
+                headers: { Authorization: `Bearer ${token}` },
             });
             setInput('');
         } else {

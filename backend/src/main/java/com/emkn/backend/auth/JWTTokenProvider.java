@@ -29,6 +29,11 @@ public class JWTTokenProvider {
 
     public static boolean validateToken(String token) {
         try {
+
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+
             Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
             return true;
         } catch (Exception ex) {
@@ -39,7 +44,7 @@ public class JWTTokenProvider {
     public static int getUserIDFromToken(String token) {
 
         if (token.startsWith("Bearer ")) {
-            token = token.substring(6);
+            token = token.substring(7);
         }
 
         Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();

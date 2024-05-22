@@ -1,103 +1,163 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
-import TeamsPanel from './TeamsPanel';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Chat from './Chat';
-import Card from './Card';
+import Cookies from 'js-cookie';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
-function GameBoardContent() {
+const GameBoardContent = () => {
     const { id } = useParams();
     const [room, setRoom] = useState(null);
-    const navigate = useNavigate();
+    const [client, setClient] = useState(null);
 
     useEffect(() => {
-        const token = Cookies.get('token');
-        const userId = parseInt(localStorage.getItem('userId'), 10);
-        const username = localStorage.getItem('username');
-
-        if (token) {
-            fetch(`/api/v1/private/rooms/${id}/connect`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ id: userId, username }),
-            })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error('Failed to connect to room');
-                    }
-                })
-                .then(data => {
-                    console.log(data);
-                    setRoom(data);})
-                .catch(error => console.error('Error:', error));
-        }
-
-        return () => {
+        const fetchRoom = async () => {
+            const token = Cookies.get('token');
             if (token) {
-                fetch(`/api/v1/private/rooms/${id}/disconnect`, {
+                const response = await fetch(`/api/v1/private/rooms/${id}/connect`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
-                    body: JSON.stringify({ id: userId, username }),
-                }).catch(error => console.error('Error:', error));
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setRoom(data);
+                } else {
+                    console.error('Failed to connect to room');
+                }
             }
+        };
+
+        fetchRoom();
+
+        const socket = new SockJS('http://localhost:8080/ws');
+        const stompClient = new Client({
+            webSocketFactory: () => socket,
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+            onConnect: () => {
+                console.log('Connected to WebSocket server');
+                const token = Cookies.get('token');
+                if (token) {
+                    stompClient.publish({
+                        destination: `/app/connect`,
+                        body: JSON.stringify({ roomId: id }),
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                }
+                stompClient.subscribe(`/topic/room/${id}`, (message) => {
+                    const updatedRoom = JSON.parse(message.body);
+                    setRoom(updatedRoom);
+                });
+            },
+            onStompError: (frame) => {
+                console.error('Broker reported error: ' + frame.headers['message']);
+                console.error('Additional details: ' + frame.body);
+            },
+            onWebSocketError: (error) => {
+                console.error('WebSocket error: ', error);
+            }
+        });
+
+        stompClient.activate();
+        setClient(stompClient);
+
+        return () => {
+            if (stompClient.connected) {
+                const token = Cookies.get('token');
+                if (token) {
+                    stompClient.publish({
+                        destination: `/app/disconnect`,
+                        body: JSON.stringify({ roomId: id }),
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                }
+            }
+            stompClient.deactivate();
         };
     }, [id]);
 
-    const handleJoinTeam = (teamId) => {
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const token = Cookies.get('token');
+            if (client && client.connected && token) {
+                client.publish({
+                    destination: '/app/ping',
+                    body: JSON.stringify({ roomId: id }),
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            }
+        }, 10000);
+
+        return () => clearInterval(interval);
+    }, [client, id]);
+
+    const handleJoinTeam = async (teamId) => {
         const token = Cookies.get('token');
-        const userId = parseInt(localStorage.getItem('userId'), 10);
-        const username = localStorage.getItem('username');
-
-        fetch(`/api/v1/private/rooms/${id}/join?teamId=${teamId}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ id: userId, username }),
-        })
-            .then(response => response.json())
-            .then(data => setRoom(data))
-            .catch(error => console.error('Error:', error));
+        if (token) {
+            const response = await fetch(`/api/v1/private/rooms/${id}/join?teamId=${teamId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setRoom(data);
+                client.publish({
+                    destination: `/app/updateRoom`,
+                    body: JSON.stringify(data),
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                console.error('Failed to join team');
+            }
+        }
     };
-
-    const handleReady = (ready) => {
-        const token = Cookies.get('token');
-        fetch(`/api/v1/private/rooms/${id}/ready?ready=${ready}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        })
-            .then(response => response.json())
-            .then(data => setRoom(data))
-            .catch(error => console.error('Error:', error));
-    };
-
-    if (!room) return <div>Loading...</div>;
 
     return (
-        <>
-            <TeamsPanel teams={room.teams} spectators={room.spectators} onJoinTeam={handleJoinTeam} />
-            <div className="cards">
-                {room.words.map((word, index) => (
-                    <Card key={index} word={word.word} teamIndex={word.teamIndex} />
-                ))}
-            </div>
-            <Chat roomId={room.id} inMessages={room.chatHistory}/>
-            {!room.started && <button onClick={() => handleReady(true)}>Ready</button>}
-            <button type="button" onClick={() => navigate(-1)}>Back</button>
-        </>
+        <div>
+            {room && (
+                <>
+                    <h1>{room.name}</h1>
+                    <div className="teams-panel">
+                        {room.teams.map((team) => (
+                            <div key={team.id} className={`team-info ${team.color}`}>
+                                <h2>{team.name}</h2>
+                                <ul>
+                                    {Object.values(team.members).map((member) => (
+                                        <li key={member.id}>{member.username}</li>
+                                    ))}
+                                </ul>
+                                <button onClick={() => handleJoinTeam(team.id)}>Join Team</button>
+                            </div>
+                        ))}
+                        <div className="team-info spectators">
+                            <h2>Spectators</h2>
+                            <ul>
+                                {Object.values(room.spectators).map((spectator) => (
+                                    <li key={spectator.id}>{spectator.username}</li>
+                                ))}
+                            </ul>
+                            <button onClick={() => handleJoinTeam(-1)}>Join as Spectator</button>
+                        </div>
+                    </div>
+                    <div className="cards">
+                        {room.words.map((word) => (
+                            <div key={word.id} className={`card team-${word.teamIndex}`}>
+                                {word.word}
+                            </div>
+                        ))}
+                    </div>
+                    <Chat roomId={id} inMessages={room.chatHistory || []} />
+                </>
+            )}
+        </div>
     );
-}
+};
 
 export default GameBoardContent;
