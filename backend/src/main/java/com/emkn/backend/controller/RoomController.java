@@ -1,12 +1,12 @@
 package com.emkn.backend.controller;
 
 import com.emkn.backend.auth.JWTTokenProvider;
-import com.emkn.backend.model.ChatMessageDTO;
 import com.emkn.backend.model.RoomDTO;
 import com.emkn.backend.model.UserDTO;
 import com.emkn.backend.repository.room.InMemoryRoomRepository;
 import com.emkn.backend.repository.room.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +17,14 @@ import java.util.List;
 @RequestMapping("/api/v1")
 public class RoomController {
 
-    private final RoomRepository roomRepository = InMemoryRoomRepository.getRoomRepository();
+    private final RoomRepository roomRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    public RoomController(RoomRepository roomRepository, SimpMessagingTemplate messagingTemplate) {
+        this.roomRepository = roomRepository;
+        this.messagingTemplate = messagingTemplate;
+    }
 
     @PostMapping("/private/rooms")
     public RoomDTO createRoom(@RequestBody RoomDTO roomDTO, HttpServletRequest request, HttpServletResponse response) {
@@ -53,7 +60,9 @@ public class RoomController {
             user.setId(userId);
             user.setUsername(username);
             roomRepository.joinTeam(id, user, teamId);
-            return roomRepository.getRoomById(id);
+            RoomDTO updatedRoom = roomRepository.getRoomById(id);
+            messagingTemplate.convertAndSend("/topic/room/" + id, updatedRoom);
+            return updatedRoom;
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
@@ -66,7 +75,9 @@ public class RoomController {
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             int userId = JWTTokenProvider.getUserIDFromToken(token.substring(7));
             roomRepository.setReadyStatus(id, userId, ready);
-            return roomRepository.getRoomById(id);
+            RoomDTO updatedRoom = roomRepository.getRoomById(id);
+            messagingTemplate.convertAndSend("/topic/room/" + id, updatedRoom);
+            return updatedRoom;
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
@@ -83,7 +94,9 @@ public class RoomController {
             user.setId(userId);
             user.setUsername(username);
             roomRepository.connectUser(id, user);
-            return roomRepository.getRoomById(id);
+            RoomDTO updatedRoom = roomRepository.getRoomById(id);
+            messagingTemplate.convertAndSend("/topic/room/" + id, updatedRoom);
+            return updatedRoom;
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
@@ -94,9 +107,11 @@ public class RoomController {
     public RoomDTO disconnectUser(@PathVariable int id, HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization");
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
-            int userId = JWTTokenProvider.getUserIDFromToken(token.substring(7));
-            roomRepository.disconnectUser(id, userId);
-            return roomRepository.getRoomById(id);
+            String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
+            roomRepository.disconnectUser(id, username);
+            RoomDTO updatedRoom = roomRepository.getRoomById(id);
+            messagingTemplate.convertAndSend("/topic/room/" + id, updatedRoom);
+            return updatedRoom;
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;

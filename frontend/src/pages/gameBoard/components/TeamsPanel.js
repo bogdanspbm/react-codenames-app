@@ -1,19 +1,19 @@
 import React from 'react';
-import TeamInfo from './TeamInfo';
 
-function TeamsPanel({ teams, spectators, onJoinTeam }) {
-    return (
-        <div className="teams-panel">
-            {teams.map((team, index) => (
-                <TeamInfo key={index} team={team} onJoinTeam={onJoinTeam} />
-            ))}
-            <div className="team-info">
-                <h3>Spectators</h3>
-                <p>{Object.values(spectators).map(spectator => spectator.username).join(', ')}</p>
-                <button onClick={() => onJoinTeam(-1)}>Join</button>
+const TeamPanel = ({ teams, onJoinTeam }) => (
+    <div className="teams-panel">
+        {teams.map((team) => (
+            <div key={team.id} className="team-info">
+                <h2>{team.name}</h2>
+                <ul>
+                    {Object.values(team.members).map((member) => (
+                        <li key={member.id}>{member.username}</li>
+                    ))}
+                </ul>
+                <button onClick={() => onJoinTeam(team.id)}>Join Team</button>
             </div>
-        </div>
-    );
-}
+        ))}
+    </div>
+);
 
-export default TeamsPanel;
+export default TeamPanel;

@@ -2,6 +2,7 @@ package com.emkn.backend.controller;
 
 import com.emkn.backend.auth.JWTTokenProvider;
 import com.emkn.backend.model.ChatMessageDTO;
+import com.emkn.backend.model.RoomDTO;
 import com.emkn.backend.repository.room.RoomRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

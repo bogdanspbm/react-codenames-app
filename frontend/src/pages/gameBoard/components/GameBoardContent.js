@@ -85,7 +85,7 @@ const GameBoardContent = () => {
             const token = Cookies.get('token');
             if (client && client.connected && token) {
                 client.publish({
-                    destination: '/app/ping',
+                    destination: `/app/ping`,
                     body: JSON.stringify({ roomId: id }),
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -94,6 +94,8 @@ const GameBoardContent = () => {
 
         return () => clearInterval(interval);
     }, [client, id]);
+
+    if (!room) return <div>Loading...</div>;
 
     const handleJoinTeam = async (teamId) => {
         const token = Cookies.get('token');
@@ -108,54 +110,59 @@ const GameBoardContent = () => {
             if (response.ok) {
                 const data = await response.json();
                 setRoom(data);
-                client.publish({
-                    destination: `/app/updateRoom`,
-                    body: JSON.stringify(data),
-                    headers: { Authorization: `Bearer ${token}` },
-                });
             } else {
                 console.error('Failed to join team');
             }
         }
     };
 
+    const handleSetReady = async (isReady) => {
+        const token = Cookies.get('token');
+        if (token) {
+            const response = await fetch(`/api/v1/private/rooms/${id}/ready?ready=${isReady}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setRoom(data);
+            } else {
+                console.error('Failed to set ready status');
+            }
+        }
+    };
+
     return (
-        <div>
-            {room && (
-                <>
-                    <h1>{room.name}</h1>
-                    <div className="teams-panel">
-                        {room.teams.map((team) => (
-                            <div key={team.id} className={`team-info ${team.color}`}>
-                                <h2>{team.name}</h2>
-                                <ul>
-                                    {Object.values(team.members).map((member) => (
-                                        <li key={member.id}>{member.username}</li>
-                                    ))}
-                                </ul>
-                                <button onClick={() => handleJoinTeam(team.id)}>Join Team</button>
-                            </div>
-                        ))}
-                        <div className="team-info spectators">
-                            <h2>Spectators</h2>
-                            <ul>
-                                {Object.values(room.spectators).map((spectator) => (
-                                    <li key={spectator.id}>{spectator.username}</li>
-                                ))}
-                            </ul>
-                            <button onClick={() => handleJoinTeam(-1)}>Join as Spectator</button>
-                        </div>
+        <div className="game-board">
+            <h1>{room.name}</h1>
+            <div className="teams-panel">
+                {room.teams.map((team) => (
+                    <div key={team.id} className="team-info">
+                        <h2>{team.name}</h2>
+                        <ul>
+                            {Object.values(team.members).map((member) => (
+                                <li key={member.id}>{member.username}</li>
+                            ))}
+                        </ul>
+                        <button onClick={() => handleJoinTeam(team.id)}>Join Team</button>
                     </div>
-                    <div className="cards">
-                        {room.words.map((word) => (
-                            <div key={word.id} className={`card team-${word.teamIndex}`}>
-                                {word.word}
-                            </div>
+                ))}
+                <div className="team-info">
+                    <h2>Spectators</h2>
+                    <ul>
+                        {Object.values(room.spectators).map((spectator) => (
+                            <li key={spectator.id}>{spectator.username}</li>
                         ))}
-                    </div>
-                    <Chat roomId={id} inMessages={room.chatHistory || []} />
-                </>
-            )}
+                    </ul>
+                    <button onClick={() => handleJoinTeam(-1)}>Join Spectators</button>
+                </div>
+            </div>
+            <button onClick={() => handleSetReady(true)}>Ready</button>
+            <button onClick={() => handleSetReady(false)}>Not Ready</button>
+            <Chat roomId={room.id} inMessages={room.chatHistory} />
         </div>
     );
 };
