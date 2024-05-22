@@ -1,12 +1,12 @@
 import React from 'react';
 import TeamInfo from './TeamInfo';
 
-function TeamsPanel() {
+function TeamsPanel({ teams }) {
     return (
         <div className="teams-panel">
-            <TeamInfo teamName="Team A" leaderName="Leader Zakhar" color="red" />
-            <TeamInfo teamName="Team B" leaderName="Leader Bogdan" color="green" />
-            <TeamInfo teamName="Team C" leaderName="Leader Unknown" color="blue" />
+            {teams.map((team, index) => (
+                <TeamInfo key={index} team={team} />
+            ))}
         </div>
     );
 }

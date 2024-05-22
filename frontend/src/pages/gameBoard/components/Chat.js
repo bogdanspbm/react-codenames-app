@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 
 function Chat() {
     const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState('');
+    const [message, setMessage] = useState('');
 
     const handleSend = () => {
-        setMessages([...messages, input]);
-        setInput('');
+        setMessages([...messages, message]);
+        setMessage('');
     };
 
     return (
@@ -18,8 +18,9 @@ function Chat() {
             </div>
             <input
                 type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Type a message"
             />
             <button onClick={handleSend}>Send</button>
         </div>

@@ -20,7 +20,7 @@ body {
   flex-direction: column;
 }
 
-.panel{
+.panel {
   padding: 20px;
   align-items: center;
   justify-content: center;
@@ -90,7 +90,7 @@ form label {
   color: #333;
 }
 
-form input {
+form input, form select {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
@@ -161,13 +161,6 @@ form button:hover {
   background-color: #fafafa;
 }
 
-.teams-panel {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  margin-bottom: 20px;
-}
-
 .team-info {
   width: 20%;
   padding: 10px;
@@ -177,9 +170,12 @@ form button:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.team-info.red { background-color: #ffcccc; }
-.team-info.green { background-color: #ccffcc; }
-.team-info.blue { background-color: #ccccff; }
+.teams-panel {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 20px;
+}
 
 .auth-container {
   position: absolute;

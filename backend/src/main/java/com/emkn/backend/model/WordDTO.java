@@ -5,6 +5,8 @@ public class WordDTO {
     private String word;
     private String lang;
 
+    private int teamIndex;
+
     public int getId() {
         return id;
     }
@@ -27,5 +29,13 @@ public class WordDTO {
 
     public void setLang(String lang) {
         this.lang = lang;
+    }
+
+    public int getTeamIndex() {
+        return teamIndex;
+    }
+
+    public void setTeamIndex(int teamIndex) {
+        this.teamIndex = teamIndex;
     }
 }

@@ -1,11 +1,10 @@
 import React from 'react';
 
-function TeamInfo({ teamName, leaderName, color }) {
+function TeamInfo({ team }) {
     return (
-        <div className={`team-info ${color}`}>
-            <div className="team-header">{teamName}</div>
-            <div>{leaderName}</div>
-            {/* Дополнительная информация о команде */}
+        <div className="team-info">
+            <h3>{team.name}</h3>
+            <p>Score: {team.score}</p>
         </div>
     );
 }
