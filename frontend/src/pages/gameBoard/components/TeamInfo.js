@@ -1,20 +1,19 @@
 import React from 'react';
 
-const TeamInfo = ({ started = false, inTeam = null, onJoinTeam = () => {} }) => {
-
-    if(inTeam === null){
-        return <div></div>
-    }
-
+const TeamInfo = ({ started, inTeam, onJoinTeam }) => {
     return (
-        <div className={`team-info team-${inTeam.id}`}>
+        <div className="team-info">
             <h2>{inTeam.name}</h2>
             <ul>
                 {Object.values(inTeam.members).map((member) => (
-                    <li key={member.username}>{inTeam.owner.username === member.username ? `Owner ${member.username}` : member.username} </li>
+                    <li key={member.id}>{member.username}</li>
                 ))}
             </ul>
-            { !started ? <button className="team-button" onClick={() => onJoinTeam(inTeam.id)}>Join Team</button> : null}
+            {!started && (
+                <button className="team-button" onClick={() => onJoinTeam(inTeam.id)}>
+                    Join {inTeam.name}
+                </button>
+            )}
         </div>
     );
 };

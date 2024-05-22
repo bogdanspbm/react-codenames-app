@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const ReadyButton = ({ room = {}}) => {
+const ReadyButton = ({ room = {} }) => {
     const [isReady, setIsReady] = useState(false);
     const token = Cookies.get('token');
 
@@ -28,6 +28,7 @@ const ReadyButton = ({ room = {}}) => {
             params: { ready: !isReady },
             headers: { Authorization: `Bearer ${token}` },
         }).then(response => {
+            const room = response.data;
             setIsReady(!isReady);
         }).catch(error => {
             console.error('Error setting ready status:', error);
@@ -37,28 +38,27 @@ const ReadyButton = ({ room = {}}) => {
     const calcReadyCount = () => {
         const membersList = [];
 
-        for(let teamIndex in room.teams){
+        for (let teamIndex in room.teams) {
             const team = room.teams[teamIndex];
-            for(let memberIndex in team.members){
+            for (let memberIndex in team.members) {
                 const member = team.members[memberIndex];
                 membersList.push(member.username);
             }
         }
 
         let counter = 0;
-        for(let memberIndex in membersList){
+
+        for (let memberIndex in membersList) {
             const member = membersList[memberIndex];
-            if(!room.readyStatus[member]){
+            if (!room.readyStatus[member]) {
                 continue;
             }
+
             counter += 1;
         }
+
         return `${counter}/${membersList.length}`;
     };
-
-    if (room.started) {
-        return null;
-    }
 
     return (
         <div className="ready-button">

@@ -3,9 +3,10 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import Cookies from 'js-cookie';
 
-const Chat = ({ roomId, inMessages = [] }) => {
+const Chat = ({ roomId, inMessages = [], isOwnerTurn, isOwner }) => {
     const [messages, setMessages] = useState(inMessages);
     const [input, setInput] = useState('');
+    const [number, setNumber] = useState('');
     const [client, setClient] = useState(null);
 
     useEffect(() => {
@@ -63,17 +64,31 @@ const Chat = ({ roomId, inMessages = [] }) => {
 
     const handleSend = () => {
         const token = Cookies.get('token');
-        if (input.trim() && token && client && client.connected) {
-            console.log(roomId);
-            const message = { content: input, roomId: roomId };
-            client.publish({
-                destination: '/app/chat',
-                body: JSON.stringify(message),
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setInput('');
+        if (isOwner && isOwnerTurn) {
+            if (input.trim() && number && token && client && client.connected) {
+                const message = { teamIndex: roomId, username: Cookies.get('username'), word: input, number: parseInt(number, 10) };
+                client.publish({
+                    destination: `/app/owner-message`,
+                    body: JSON.stringify(message),
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setInput('');
+                setNumber('');
+            } else {
+                console.error('Cannot send message. Either input or number is empty, token is missing, or client is not connected.');
+            }
         } else {
-            console.error('Cannot send message. Either input is empty, token is missing, or client is not connected.');
+            if (input.trim() && token && client && client.connected) {
+                const message = { content: input, roomId: roomId };
+                client.publish({
+                    destination: '/app/chat',
+                    body: JSON.stringify(message),
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setInput('');
+            } else {
+                console.error('Cannot send message. Either input is empty, token is missing, or client is not connected.');
+            }
         }
     };
 
@@ -93,6 +108,14 @@ const Chat = ({ roomId, inMessages = [] }) => {
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type a message"
                 />
+                {isOwner && isOwnerTurn && (
+                    <input
+                        type="number"
+                        value={number}
+                        onChange={(e) => setNumber(e.target.value)}
+                        placeholder="Number"
+                    />
+                )}
                 <button onClick={handleSend}>Send</button>
             </div>
         </div>

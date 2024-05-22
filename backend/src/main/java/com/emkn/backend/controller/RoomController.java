@@ -1,6 +1,7 @@
 package com.emkn.backend.controller;
 
 import com.emkn.backend.auth.JWTTokenProvider;
+import com.emkn.backend.model.OwnerMessageDTO;
 import com.emkn.backend.model.RoomDTO;
 import com.emkn.backend.model.UserDTO;
 import com.emkn.backend.repository.room.RoomRepository;
@@ -21,7 +22,6 @@ import java.util.TimerTask;
 public class RoomController {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketRoomController.class);
-
 
     private final RoomRepository roomRepository;
     private final SimpMessagingTemplate messagingTemplate;
@@ -60,7 +60,6 @@ public class RoomController {
     public RoomDTO joinTeam(@PathVariable int id, @RequestParam int teamId, HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization");
 
-
         logger.info("[Join] Room: " + id + ", Team ID: " + teamId + ", Token: " + token);
 
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
@@ -86,36 +85,12 @@ public class RoomController {
 
         logger.info("[Ready] Room: " + id + ", Token: " + token);
 
-
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             int userId = JWTTokenProvider.getUserIDFromToken(token.substring(7));
             String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
             roomRepository.setReadyStatus(id, username, ready, messagingTemplate);
             RoomDTO room = roomRepository.getRoomById(id);
             messagingTemplate.convertAndSend("/topic/room/" + id, room);
-
-            if (room.getTeams().stream()
-                    .flatMap(team -> team.getMembers().values().stream())
-                    .allMatch(member -> room.getReadyStatus().getOrDefault(member.getId(), false))) {
-
-                Timer timer = new Timer();
-                timer.scheduleAtFixedRate(new TimerTask() {
-                    int countdown = 5;
-
-                    @Override
-                    public void run() {
-                        if (countdown > 0) {
-                            messagingTemplate.convertAndSend("/topic/countdown/" + id, countdown);
-                            countdown--;
-                        } else {
-                            room.setStarted(true);
-                            messagingTemplate.convertAndSend("/topic/room/" + id, room);
-                            timer.cancel();
-                        }
-                    }
-                }, 0, 1000);
-            }
-
             return room;
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -128,7 +103,6 @@ public class RoomController {
         String token = request.getHeader("Authorization");
 
         logger.info("[Connect] Room: " + id + ", Token: " + token);
-
 
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             int userId = JWTTokenProvider.getUserIDFromToken(token.substring(7));
@@ -157,6 +131,31 @@ public class RoomController {
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
+        }
+    }
+
+    // Новый метод для обработки сообщений владельца команды
+    @PostMapping("/private/rooms/{id}/owner-message")
+    public void addOwnerMessage(@PathVariable int id, @RequestBody OwnerMessageDTO message, HttpServletRequest request, HttpServletResponse response) {
+        String token = request.getHeader("Authorization");
+
+        if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
+            roomRepository.addOwnerMessage(id, message, messagingTemplate);
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        }
+    }
+
+    // Новый метод для голосования
+    @PostMapping("/private/rooms/{id}/vote")
+    public void voteForWord(@PathVariable int id, @RequestParam String word, HttpServletRequest request, HttpServletResponse response) {
+        String token = request.getHeader("Authorization");
+
+        if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
+            String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
+            roomRepository.voteForWord(id, word, username);
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
 }

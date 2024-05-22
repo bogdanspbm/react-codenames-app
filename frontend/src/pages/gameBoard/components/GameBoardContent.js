@@ -13,6 +13,7 @@ const GameBoardContent = () => {
     const { id } = useParams();
     const [room, setRoom] = useState(null);
     const [countdown, setCountdown] = useState(null);
+    const [turnType, setTurnType] = useState(null);
     const token = Cookies.get('token');
 
     useEffect(() => {
@@ -38,14 +39,18 @@ const GameBoardContent = () => {
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
             onConnect: () => {
+                console.log('Connected to WebSocket server');
                 stompClient.subscribe(`/topic/room/${id}`, (message) => {
                     const updatedRoom = JSON.parse(message.body);
-                    console.log(updatedRoom);
                     setRoom(updatedRoom);
                 });
                 stompClient.subscribe(`/topic/countdown/${id}`, (message) => {
                     const countdownValue = JSON.parse(message.body);
                     setCountdown(countdownValue);
+                });
+                stompClient.subscribe(`/topic/turn/${id}`, (message) => {
+                    const turnType = message.body;
+                    setTurnType(turnType);
                 });
                 if (token) {
                     stompClient.publish({
@@ -100,11 +105,19 @@ const GameBoardContent = () => {
             <TeamPanel started={room.started} teams={room.teams} spectators={room.spectators} onJoinTeam={handleJoinTeam} />
             <GameGrid words={room.words} />
             <ReadyButton room={room} />
-            <Chat roomId={id} inMessages={room.chatHistory} />
+            <Chat roomId={id} inMessages={room.chatHistory} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} />
             {room.started ? (
                 <div className="game-status">Game Started</div>
             ) : (
                 countdown !== null && <div className="countdown">Game starts in: {countdown}</div>
+            )}
+            {turnType && (
+                <div className="turn-status">
+                    {turnType === 'owner' ? 'Owner turn in progress' : 'Member turn in progress'}
+                </div>
+            )}
+            {countdown !== null && turnType && (
+                <div className="turn-countdown">Turn ends in: {countdown}</div>
             )}
         </div>
     );

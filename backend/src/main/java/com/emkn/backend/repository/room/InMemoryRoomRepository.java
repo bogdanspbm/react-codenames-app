@@ -172,25 +172,42 @@ public class InMemoryRoomRepository implements RoomRepository {
         RoomDTO room = rooms.get(roomId);
         if (room == null) return;
 
-        if (room.isOwnerTurn()) {
-            startOwnerTurn(roomId, messagingTemplate);
-        } else {
-            startMemberTurn(roomId, messagingTemplate);
-        }
-    }
-
-    private void startOwnerTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
         Timer timer = new Timer();
         countdownTimers.put(roomId, timer);
 
-        timer.schedule(new TimerTask() {
+        TeamDTO currentTeam = room.getTeams().get(room.getCurrentTeamIndex());
+        String turnType = room.isOwnerTurn() ? "owner" : "member";
+        String messageContent = "Ход " + (room.isOwnerTurn() ? "владельца команды " : "участников команды ") + currentTeam.getName();
+
+        ChatMessageDTO logMessage = new ChatMessageDTO();
+        logMessage.setSender("System");
+        logMessage.setContent(messageContent);
+        logMessage.setRoomId(roomId);
+        room.getChatHistory().add(logMessage);
+        messagingTemplate.convertAndSend("/topic/messages", logMessage);
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            int countdown = 60;
+
             @Override
             public void run() {
-                endOwnerTurn(roomId, messagingTemplate);
-            }
-        }, 60000); // 60 секунд для хода владельца команды
+                if (countdown > 0) {
 
-        messagingTemplate.convertAndSend("/topic/turn/" + roomId, "owner");
+                    logger.info("Countdown: " + countdown);
+                    messagingTemplate.convertAndSend("/topic/countdown/" + roomId, countdown);
+                    countdown--;
+                } else {
+                    if (room.isOwnerTurn()) {
+                        endOwnerTurn(roomId, messagingTemplate);
+                    } else {
+                        endMemberTurn(roomId, messagingTemplate);
+                    }
+                    timer.cancel();
+                }
+            }
+        }, 0, 1000);
+
+        messagingTemplate.convertAndSend("/topic/turn/" + roomId, turnType);
     }
 
     private void endOwnerTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
@@ -198,23 +215,35 @@ public class InMemoryRoomRepository implements RoomRepository {
         RoomDTO room = rooms.get(roomId);
         if (room == null) return;
 
+        // Логика для завершения хода владельца команды
+        TeamDTO currentTeam = room.getTeams().get(room.getCurrentTeamIndex());
+        if (!room.getOwnerMessages().isEmpty()) {
+            OwnerMessageDTO lastOwnerMessage = room.getOwnerMessages().get(room.getOwnerMessages().size() - 1);
+            String owner = lastOwnerMessage.getUsername();
+            String messageContent = owner + " назвал слово: " + lastOwnerMessage.getWord() + " и число: " + lastOwnerMessage.getNumber();
+
+            ChatMessageDTO logMessage = new ChatMessageDTO();
+            logMessage.setSender("System");
+            logMessage.setContent(messageContent);
+            logMessage.setRoomId(roomId);
+            room.getChatHistory().add(logMessage);
+            messagingTemplate.convertAndSend("/topic/messages", logMessage);
+        } else if (currentTeam.getOwner() != null) {
+            String owner = currentTeam.getOwner().getUsername();
+            String messageContent = owner + " не назвал слово.";
+
+            ChatMessageDTO logMessage = new ChatMessageDTO();
+            logMessage.setSender("System");
+            logMessage.setContent(messageContent);
+            logMessage.setRoomId(roomId);
+            room.getChatHistory().add(logMessage);
+            messagingTemplate.convertAndSend("/topic/messages", logMessage);
+        }
+
         room.setOwnerTurn(false);
+        room.clearVotes(); // Очистка голосов перед ходом участников
         messagingTemplate.convertAndSend("/topic/room/" + roomId, room);
         startTurn(roomId, messagingTemplate);
-    }
-
-    private void startMemberTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
-        Timer timer = new Timer();
-        countdownTimers.put(roomId, timer);
-
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                endMemberTurn(roomId, messagingTemplate);
-            }
-        }, 60000); // 60 секунд для хода участников команды
-
-        messagingTemplate.convertAndSend("/topic/turn/" + roomId, "member");
     }
 
     private void endMemberTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
@@ -222,10 +251,63 @@ public class InMemoryRoomRepository implements RoomRepository {
         RoomDTO room = rooms.get(roomId);
         if (room == null) return;
 
+        // Логика для обработки хода участников команды
+        TeamDTO currentTeam = room.getTeams().get(room.getCurrentTeamIndex());
+        int count = room.getOwnerNumber(); // Предполагается, что у нас есть способ получить число от владельца команды
+        room.selectWords(count);
+        String messageContent = currentTeam.getName() + " выбрала слова: " + String.join(", ", room.getSelectedWords());
+
+        ChatMessageDTO logMessage = new ChatMessageDTO();
+        logMessage.setSender("System");
+        logMessage.setContent(messageContent);
+        logMessage.setRoomId(roomId);
+        room.getChatHistory().add(logMessage);
+        messagingTemplate.convertAndSend("/topic/messages", logMessage);
+
         room.setOwnerTurn(true);
         room.setCurrentTeamIndex((room.getCurrentTeamIndex() + 1) % room.getTeams().size());
+        room.clearSelectedWords(); // Очистка выбранных слов после хода
         messagingTemplate.convertAndSend("/topic/room/" + roomId, room);
         startTurn(roomId, messagingTemplate);
+    }
+
+
+
+    @Override
+    public void addOwnerMessage(int roomId, OwnerMessageDTO message, SimpMessagingTemplate messagingTemplate) {
+        RoomDTO room = rooms.get(roomId);
+        if (room == null || !room.isOwnerTurn()) {
+            return;
+        }
+
+        room.getOwnerMessages().add(message);
+
+        TeamDTO currentTeam = room.getTeams().get(room.getCurrentTeamIndex());
+        String messageContent = message.getUsername() + " назвал слово: " + message.getWord() + " и число: " + message.getNumber();
+
+        ChatMessageDTO logMessage = new ChatMessageDTO();
+        logMessage.setSender("System");
+        logMessage.setContent(messageContent);
+        logMessage.setRoomId(roomId);
+        room.getChatHistory().add(logMessage);
+        messagingTemplate.convertAndSend("/topic/messages", logMessage);
+
+        endOwnerTurn(roomId, messagingTemplate);
+    }
+
+
+    // Новый метод для обработки голосования участников
+    @Override
+    public void voteForWord(int roomId, String word, String username) {
+        RoomDTO room = rooms.get(roomId);
+        if (room == null || room.isOwnerTurn()) {
+            return;
+        }
+
+        TeamDTO currentTeam = room.getTeams().get(room.getCurrentTeamIndex());
+        if (currentTeam.getMembers().containsKey(username)) {
+            room.addVote(word);
+        }
     }
 
     private void stopCountdown(int roomId) {

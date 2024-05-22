@@ -1,9 +1,6 @@
 package com.emkn.backend.repository.room;
 
-import com.emkn.backend.model.ChatMessageDTO;
-import com.emkn.backend.model.RoomDTO;
-import com.emkn.backend.model.UserDTO;
-import com.emkn.backend.model.UserPingDTO;
+import com.emkn.backend.model.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
@@ -17,7 +14,11 @@ public interface RoomRepository {
 
     void deleteRoomByUserId(int userId);
 
-     void setReadyStatus(int roomId, String userName, boolean isReady, SimpMessagingTemplate messagingTemplate);
+    void setReadyStatus(int roomId, String userName, boolean isReady, SimpMessagingTemplate messagingTemplate);
+
+    void voteForWord(int roomId, String word, String username);
+
+    void addOwnerMessage(int roomId, OwnerMessageDTO message, SimpMessagingTemplate messagingTemplate);
 
     void joinTeam(int roomId, UserDTO user, int teamId);
 

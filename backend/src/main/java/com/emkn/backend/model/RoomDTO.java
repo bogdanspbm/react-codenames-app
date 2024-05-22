@@ -15,7 +15,16 @@ public class RoomDTO {
     private boolean isStarted = false;
     private Map<String, Boolean> readyStatus = new HashMap<>();
     private Map<String, UserDTO> spectators = new HashMap<>();
-    private List<ChatMessageDTO> chatHistory = new ArrayList<>(); // Новое поле для истории чата
+    private List<ChatMessageDTO> chatHistory = new ArrayList<>();
+    private int currentTeamIndex = 0;
+    private boolean ownerTurn = true;
+
+    // Новое поле
+    private List<OwnerMessageDTO> ownerMessages = new ArrayList<>();
+
+    // Новые поля для голосования
+    private Map<String, Integer> voteCounts = new HashMap<>();
+    private List<String> selectedWords = new ArrayList<>();
 
     // Getters and Setters
 
@@ -72,7 +81,7 @@ public class RoomDTO {
     }
 
     public void setStarted(boolean started) {
-        this.isStarted = started;
+        isStarted = started;
     }
 
     public Map<String, Boolean> getReadyStatus() {
@@ -99,6 +108,55 @@ public class RoomDTO {
         this.chatHistory = chatHistory;
     }
 
+    public int getCurrentTeamIndex() {
+        return currentTeamIndex;
+    }
+
+    public void setCurrentTeamIndex(int currentTeamIndex) {
+        this.currentTeamIndex = currentTeamIndex;
+    }
+
+    public boolean isOwnerTurn() {
+        return ownerTurn;
+    }
+
+    public void setOwnerTurn(boolean ownerTurn) {
+        this.ownerTurn = ownerTurn;
+    }
+
+    public Map<String, Integer> getVoteCounts() {
+        return voteCounts;
+    }
+
+    public List<String> getSelectedWords() {
+        return selectedWords;
+    }
+
+    public List<OwnerMessageDTO> getOwnerMessages() {
+        return ownerMessages;
+    }
+
+    // Методы для голосования
+    public void addVote(String word) {
+        voteCounts.put(word, voteCounts.getOrDefault(word, 0) + 1);
+    }
+
+    public void clearVotes() {
+        voteCounts.clear();
+    }
+
+    public void selectWords(int count) {
+        selectedWords.clear();
+        voteCounts.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .limit(count)
+                .forEach(entry -> selectedWords.add(entry.getKey()));
+    }
+
+    public void clearSelectedWords() {
+        selectedWords.clear();
+    }
+
     public static Map<Integer, RoomDTO> generateTemplates() {
         Map<Integer, RoomDTO> output = new HashMap<>();
 
@@ -109,5 +167,13 @@ public class RoomDTO {
 
         output.put(1, roomA);
         return output;
+    }
+
+    // Метод для получения последнего числа от владельца команды
+    public int getOwnerNumber() {
+        if (!ownerMessages.isEmpty()) {
+            return ownerMessages.get(ownerMessages.size() - 1).getNumber();
+        }
+        return 0; // Возвращаем 0, если нет сообщений от владельца
     }
 }
