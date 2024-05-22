@@ -9,7 +9,7 @@ import ReadyButton from './ReadyButton';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
-const GameBoardContent = () => {
+const GameBoardContent = ({username}) => {
     const { id } = useParams();
     const [room, setRoom] = useState(null);
     const [countdown, setCountdown] = useState(null);
@@ -100,12 +100,13 @@ const GameBoardContent = () => {
         return <div>Loading...</div>;
     }
 
+
     return (
         <div className="game-board">
             <TeamPanel started={room.started} teams={room.teams} spectators={room.spectators} onJoinTeam={handleJoinTeam} />
             <GameGrid words={room.words} />
             <ReadyButton room={room} />
-            <Chat roomId={id} inMessages={room.chatHistory} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} />
+            <Chat roomId={id} inMessages={room.chatHistory} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === username)} />
             {room.started ? (
                 <div className="game-status">Game Started</div>
             ) : (

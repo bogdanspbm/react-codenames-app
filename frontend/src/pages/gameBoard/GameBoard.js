@@ -2,10 +2,10 @@ import React from 'react';
 import GameBoardContent from './components/GameBoardContent';
 import '../../App.css';
 
-function GameBoard() {
+function GameBoard({username}) {
     return (
         <div className="container">
-            <GameBoardContent />
+            <GameBoardContent username={username} />
         </div>
     );
 }

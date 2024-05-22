@@ -26,6 +26,7 @@ function AuthForm({ isLoggedIn, username, onLogin, onLogout }) {
                 // При авторизации результатом будет объект с токеном
                 const token = result.token;
                 Cookies.set('token', token, { expires: 7 });
+                Cookies.set('username', formData.username,{ expires: 7 } );
                 onLogin(formData.username);
             } else {
                 // При регистрации результатом будет объект пользователя

@@ -4,9 +4,8 @@ import AuthForm from './components/AuthForm';
 import Cookies from 'js-cookie';
 import '../../App.css';
 
-function MainMenu() {
+function MainMenu({username, setUsername}) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [username, setUsername] = useState('');
 
     useEffect(() => {
         const token = Cookies.get('token');

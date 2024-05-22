@@ -139,6 +139,8 @@ public class RoomController {
     public void addOwnerMessage(@PathVariable int id, @RequestBody OwnerMessageDTO message, HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization");
 
+        logger.info("[Owner Message] Room: " + id + ", Token: " + token + ", Message: " + message.toString());
+
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             roomRepository.addOwnerMessage(id, message, messagingTemplate);
         } else {
@@ -150,6 +152,8 @@ public class RoomController {
     @PostMapping("/private/rooms/{id}/vote")
     public void voteForWord(@PathVariable int id, @RequestParam String word, HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization");
+
+        logger.info("[Vote] Room: " + id + ", Token: " + token + ", Word: " + word);
 
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));

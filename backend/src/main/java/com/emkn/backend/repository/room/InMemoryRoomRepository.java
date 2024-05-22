@@ -192,8 +192,6 @@ public class InMemoryRoomRepository implements RoomRepository {
             @Override
             public void run() {
                 if (countdown > 0) {
-
-                    logger.info("Countdown: " + countdown);
                     messagingTemplate.convertAndSend("/topic/countdown/" + roomId, countdown);
                     countdown--;
                 } else {

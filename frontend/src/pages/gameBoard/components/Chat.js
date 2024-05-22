@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const Chat = ({ roomId, inMessages = [], isOwnerTurn, isOwner }) => {
@@ -65,17 +66,25 @@ const Chat = ({ roomId, inMessages = [], isOwnerTurn, isOwner }) => {
     const handleSend = () => {
         const token = Cookies.get('token');
         if (isOwner && isOwnerTurn) {
-            if (input.trim() && number && token && client && client.connected) {
-                const message = { teamIndex: roomId, username: Cookies.get('username'), word: input, number: parseInt(number, 10) };
-                client.publish({
-                    destination: `/app/owner-message`,
-                    body: JSON.stringify(message),
+            if (input.trim() && number && token) {
+                const message = {
+                    teamIndex: roomId,
+                    username: Cookies.get('username'),
+                    word: input,
+                    number: parseInt(number, 10)
+                };
+                axios.post(`/api/v1/private/rooms/${roomId}/owner-message`, message, {
                     headers: { Authorization: `Bearer ${token}` },
-                });
-                setInput('');
-                setNumber('');
+                })
+                    .then(() => {
+                        setInput('');
+                        setNumber('');
+                    })
+                    .catch(error => {
+                        console.error('Error sending owner message:', error);
+                    });
             } else {
-                console.error('Cannot send message. Either input or number is empty, token is missing, or client is not connected.');
+                console.error('Cannot send message. Either input or number is empty, or token is missing.');
             }
         } else {
             if (input.trim() && token && client && client.connected) {
