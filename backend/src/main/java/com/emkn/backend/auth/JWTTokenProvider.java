@@ -49,4 +49,17 @@ public class JWTTokenProvider {
 
         return userID;
     }
+
+    public static String getUsernameFromToken(String token) {
+
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(6);
+        }
+
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+        JSONObject json = new JSONObject(claims.getSubject());
+
+
+        return json.getString("username");
+    }
 }

@@ -1,12 +1,17 @@
 package com.emkn.backend.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TeamDTO {
-    private int id;
-    private String name;
-    private int owner;
-    private List<Integer> members;
+    private int id = -1;
+    private String name = "";
+    private UserDTO owner = null;
+    private Map<String, UserDTO> members = new HashMap<>();
+
+
 
     // Getters and Setters
     public int getId() {
@@ -25,19 +30,19 @@ public class TeamDTO {
         this.name = name;
     }
 
-    public int getOwner() {
+    public UserDTO getOwner() {
         return owner;
     }
 
-    public void setOwner(int owner) {
+    public void setOwner(UserDTO owner) {
         this.owner = owner;
     }
 
-    public List<Integer> getMembers() {
+    public Map<String, UserDTO> getMembers() {
         return members;
     }
 
-    public void setMembers(List<Integer> members) {
+    public void setMembers(Map<String, UserDTO> members) {
         this.members = members;
     }
 }

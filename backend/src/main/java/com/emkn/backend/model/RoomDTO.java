@@ -12,7 +12,13 @@ public class RoomDTO {
     private int teamCount = 2;
     private String language = "Russian";
     private List<WordDTO> words = new ArrayList<>();
-    private List<TeamDTO> teams = new ArrayList<>();;
+    private List<TeamDTO> teams = new ArrayList<>();
+
+    private boolean started = false;
+    private Map<Integer, Boolean> readyStatus = new HashMap<>();
+
+    private Map<String, UserDTO> spectators = new HashMap<>();
+
 
 
     public int getId() {
@@ -61,6 +67,30 @@ public class RoomDTO {
 
     public void setTeams(List<TeamDTO> teams) {
         this.teams = teams;
+    }
+
+    public boolean isStarted() {
+        return started;
+    }
+
+    public void setStarted(boolean started) {
+        this.started = started;
+    }
+
+    public Map<Integer, Boolean> getReadyStatus() {
+        return readyStatus;
+    }
+
+    public void setReadyStatus(Map<Integer, Boolean> readyStatus) {
+        this.readyStatus = readyStatus;
+    }
+
+    public Map<String, UserDTO> getSpectators() {
+        return spectators;
+    }
+
+    public void setSpectators(Map<String, UserDTO> spectators) {
+        this.spectators = spectators;
     }
 
     public static Map<Integer, RoomDTO> generateTemplates(){
