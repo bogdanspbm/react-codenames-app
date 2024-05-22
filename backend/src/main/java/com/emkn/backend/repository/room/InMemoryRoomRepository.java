@@ -88,21 +88,31 @@ public class InMemoryRoomRepository implements RoomRepository {
     @Override
     public void joinTeam(int roomId, UserDTO user, int teamId) {
         RoomDTO room = rooms.get(roomId);
-        if (room != null && !room.isStarted()) {
-            for (TeamDTO team : room.getTeams()) {
-                team.getMembers().remove(user.getUsername());
-                if (team.getId() == teamId) {
-                    team.getMembers().put(user.getUsername(), user);
-                    if (team.getOwner() == null) {
-                        team.setOwner(user);
-                    }
+        if (room == null || room.isStarted()) {
+          return;
+        }
+
+        for (TeamDTO team : room.getTeams()) {
+            team.getMembers().remove(user.getUsername());
+
+            if(team.getMembers().isEmpty()){
+                team.setOwner(null);
+            } else {
+                team.setOwner(team.getMembers().get(team.getMembers().keySet().stream().findFirst().get()));
+            }
+
+            if (team.getId() == teamId) {
+                team.getMembers().put(user.getUsername(), user);
+                if (team.getOwner() == null) {
+                    team.setOwner(user);
                 }
             }
-            if (teamId == -1) {
-                room.getSpectators().put(user.getUsername(), user);
-            } else {
-                room.getSpectators().remove(user.getUsername());
-            }
+        }
+
+        if (teamId == -1) {
+            room.getSpectators().put(user.getUsername(), user);
+        } else {
+            room.getSpectators().remove(user.getUsername());
         }
     }
 

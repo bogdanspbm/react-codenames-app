@@ -1,18 +1,12 @@
 import React from 'react';
+import TeamInfo from "./TeamInfo";
 
-const TeamPanel = ({ teams, spectators, onJoinTeam }) => (
-    <div className="teams-panel">
-        {teams.map((team) => (
-            <div key={team.id} className="team-info">
-                <h2>{team.name}</h2>
-                <ul>
-                    {Object.values(team.members).map((member) => (
-                        <li key={member.id}>{member.username}</li>
-                    ))}
-                </ul>
-                <button className="team-button" onClick={() => onJoinTeam(team.id)}>Join Team</button>
-            </div>
-        ))}
+const TeamPanel = ({teams, spectators, onJoinTeam}) => {
+    
+    return <div className="teams-panel">
+        {
+            teams.map(team => (<TeamInfo key={team.id} inTeam={team} onJoinTeam={onJoinTeam}/>))
+        }
         <div key="spectators" className="team-info">
             <h2>Spectators</h2>
             <ul>
@@ -23,6 +17,6 @@ const TeamPanel = ({ teams, spectators, onJoinTeam }) => (
             <button className="team-button" onClick={() => onJoinTeam(-1)}>Join Spectators</button>
         </div>
     </div>
-);
+};
 
 export default TeamPanel;
