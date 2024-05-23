@@ -6,7 +6,7 @@ import '../styles/Header.css';
 
 const Header = ({colorMap, borderColorMap, room, countdown, turnType, handleJoinTeam}) => {
     return (<div className={"header"}>
-        <TeamPanel colorMap={colorMap} borderColorMap={borderColorMap} started={room.started} teams={room.teams}
+        <TeamPanel room={room} colorMap={colorMap} borderColorMap={borderColorMap} started={room.started} teams={room.teams}
                    spectators={room.spectators} onJoinTeam={handleJoinTeam}/>
         {room.started ? (
             <div className="game-status">Game Started</div>
