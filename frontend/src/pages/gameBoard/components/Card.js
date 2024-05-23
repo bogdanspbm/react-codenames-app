@@ -8,24 +8,28 @@ function Card({isOwner, isOwnerTurn, word, teamIndex, votes, onVote, isSelected 
     };
 
     const colorMap = {
-        0: "#d9f7be",
-        1: "#ffccc7",
-        2: "#bae0ff",
-        3: "#ffffb8",
-        4: "#efdbff"
+        default: "#fafafa",
+        0: "#73d13d",
+        1: "#ff4d4f",
+        2: "#4096ff",
+        3: "#ffec3d",
+        4: "#9254de",
+        5: "#262626"
     }
 
     const borderColorMap = {
+        default: "#d9d9d9",
         0: "#52c41a",
         1: "#f5222d",
         2: "#1677ff",
         3: "#fadb14",
-        4: "#722ed1"
+        4: "#722ed1",
+        5: "#141414"
     }
 
     if (isOwner || isSelected) {
         return (
-            <div className={`card`} style={{background : colorMap[teamIndex], border: `1px solid ${borderColorMap[teamIndex]}`}}>
+            <div className={`card`} style={{color: "white", background : colorMap[teamIndex], border: `1px solid ${borderColorMap[teamIndex]}`}}>
                 <p>{word}</p>
                 {votes !== undefined && <p>Votes: {votes}</p>}
             </div>

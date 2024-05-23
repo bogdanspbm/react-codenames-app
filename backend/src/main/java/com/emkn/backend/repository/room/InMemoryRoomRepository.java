@@ -377,13 +377,18 @@ public class InMemoryRoomRepository implements RoomRepository {
     }
 
     private void generateWordsForRoom(RoomDTO roomDTO) {
-        List<WordDTO> words = wordRepository.getRandomWords(roomDTO.getTeamCount() * 5, roomDTO.getLanguage());
-        assignWordsToTeams(words, roomDTO.getTeamCount());
+        List<WordDTO> words = wordRepository.getRandomWords(25, roomDTO.getLanguage());
+        assignWordsToTeams(words, roomDTO.getTeamCount(), 25);
+        words.get(0).setTeamIndex(5);
+        Collections.shuffle(words);
         roomDTO.setWords(words);
     }
 
-    private void assignWordsToTeams(List<WordDTO> words, int teamCount) {
+    private void assignWordsToTeams(List<WordDTO> words, int teamCount, int limit) {
         for (int i = 0; i < words.size(); i++) {
+            if(i > limit){
+                return;
+            }
             words.get(i).setTeamIndex(i % teamCount);
         }
     }

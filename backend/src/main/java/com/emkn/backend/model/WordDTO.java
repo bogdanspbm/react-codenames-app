@@ -1,11 +1,11 @@
 package com.emkn.backend.model;
 
 public class WordDTO {
-    private int id;
-    private String word;
-    private String lang;
+    private int id = -1;
+    private String word = "";
+    private String lang = "en";
 
-    private int teamIndex;
+    private int teamIndex = -1;
 
     public int getId() {
         return id;

@@ -1,6 +1,6 @@
-/* Общие стили для всего приложения */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+
 body {
-  font-family: Arial, sans-serif;
   background-color: #f0f2f5;
   margin: 0;
   padding: 0;
@@ -8,6 +8,11 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+
+  font-family: "Roboto Condensed", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .container {
@@ -57,7 +62,8 @@ a:hover {
 }
 
 .game-grid {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
   justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
@@ -157,20 +163,28 @@ form button:hover {
   background-color: #40a9ff;
 }
 
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
-  margin-top: 20px;
-  width: 100%;
-}
 
 .card {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
   border: 1px solid #ccc;
-  padding: 20px;
+
+  margin: 4px;
+  width: 186px;
+  height: 96px;
+
   text-align: center;
   border-radius: 8px;
   background-color: #fafafa;
+  font-size: 24px;
+
+  color: #242424;
+  cursor: pointer;
+
+  font-weight: 900;
 }
 
 .teams-panel {
