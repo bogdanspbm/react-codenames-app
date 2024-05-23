@@ -92,13 +92,13 @@ public class InMemoryRoomRepository implements RoomRepository {
         room.setReadyStatus(new HashMap<>());
 
         if (room == null || room.isStarted()) {
-          return;
+            return;
         }
 
         for (TeamDTO team : room.getTeams()) {
             team.getMembers().remove(user.getUsername());
 
-            if(team.getMembers().isEmpty()){
+            if (team.getMembers().isEmpty()) {
                 team.setOwner(null);
             } else {
                 team.setOwner(team.getMembers().get(team.getMembers().keySet().stream().findFirst().get()));
@@ -138,7 +138,7 @@ public class InMemoryRoomRepository implements RoomRepository {
             }
         }
 
-        if(counter == 0){
+        if (counter == 0) {
             stopCountdown(roomId);
             return;
         }
@@ -224,28 +224,32 @@ public class InMemoryRoomRepository implements RoomRepository {
 
         // Логика для завершения хода владельца команды
         TeamDTO currentTeam = room.getTeams().get(room.getCurrentTeamIndex());
-        if (!room.getOwnerMessages().isEmpty() && room.hasUnusedOwnerMessage()) {
-            OwnerMessageDTO lastOwnerMessage = room.getOwnerMessages().get(room.getOwnerMessages().size() - 1);
-            String owner = lastOwnerMessage.getUsername();
-            String messageContent = owner + " назвал слово: " + lastOwnerMessage.getWord() + " и число: " + lastOwnerMessage.getNumber();
+        if (room.getOwnerMessages().isEmpty() || !room.hasUnusedOwnerMessage()) {
+            OwnerMessageDTO newOwnerMessage = new OwnerMessageDTO();
+            newOwnerMessage.setTurnNumber(room.getTurn());
+            try {
+                newOwnerMessage.setUsername(room.getTeams().get(room.getCurrentTeamIndex()).getOwner().getUsername());
+            } catch (Exception e) {
 
-            ChatMessageDTO logMessage = new ChatMessageDTO();
-            logMessage.setSender("System");
-            logMessage.setContent(messageContent);
-            logMessage.setRoomId(roomId);
-            room.getChatHistory().add(logMessage);
-            messagingTemplate.convertAndSend("/topic/messages", logMessage);
-        } else if (currentTeam.getOwner() != null) {
-            String owner = currentTeam.getOwner().getUsername();
-            String messageContent = owner + " не назвал слово.";
-
-            ChatMessageDTO logMessage = new ChatMessageDTO();
-            logMessage.setSender("System");
-            logMessage.setContent(messageContent);
-            logMessage.setRoomId(roomId);
-            room.getChatHistory().add(logMessage);
-            messagingTemplate.convertAndSend("/topic/messages", logMessage);
+            }
+            WordDTO word = room.getUnusedWordForTeams(currentTeam.getId());
+            if(word != null){
+                newOwnerMessage.setWord(word.getWord());
+            }
+            newOwnerMessage.setNumber(1);
+            room.getOwnerMessages().add(newOwnerMessage);
         }
+
+        OwnerMessageDTO lastOwnerMessage = room.getOwnerMessages().get(room.getOwnerMessages().size() - 1);
+        String owner = lastOwnerMessage.getUsername();
+        String messageContent = owner + " назвал слово: " + lastOwnerMessage.getWord() + " и число: " + lastOwnerMessage.getNumber();
+
+        ChatMessageDTO logMessage = new ChatMessageDTO();
+        logMessage.setSender("System");
+        logMessage.setContent(messageContent);
+        logMessage.setRoomId(roomId);
+        room.getChatHistory().add(logMessage);
+        messagingTemplate.convertAndSend("/topic/messages", logMessage);
 
         room.setOwnerTurn(false);
         room.clearVotes(); // Очистка голосов перед ходом участников
@@ -277,7 +281,6 @@ public class InMemoryRoomRepository implements RoomRepository {
         messagingTemplate.convertAndSend("/topic/room/" + roomId, room);
         startTurn(roomId, messagingTemplate);
     }
-
 
 
     @Override
@@ -385,7 +388,7 @@ public class InMemoryRoomRepository implements RoomRepository {
 
     private void assignWordsToTeams(List<WordDTO> words, int teamCount, int limit) {
         for (int i = 0; i < words.size(); i++) {
-            if(i > limit){
+            if (i > limit) {
                 return;
             }
             words.get(i).setTeamIndex(i % teamCount);

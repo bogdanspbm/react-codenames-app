@@ -123,6 +123,24 @@ public class RoomDTO {
         return ownerTurn;
     }
 
+    public WordDTO getUnusedWordForTeams(int index) {
+        for (WordDTO wordDTO : words) {
+            if(wordDTO.getTeamIndex() != index){
+                continue;
+            }
+
+            if(selectedWords == null || selectedWords.size() == 0 ){
+                return wordDTO;
+            }
+
+            if(!selectedWords.containsKey(wordDTO.getWord()) || !selectedWords.get(wordDTO.getWord())){
+                return wordDTO;
+            }
+        }
+
+        return null;
+    }
+
     public void setOwnerTurn(boolean ownerTurn) {
         this.ownerTurn = ownerTurn;
     }
