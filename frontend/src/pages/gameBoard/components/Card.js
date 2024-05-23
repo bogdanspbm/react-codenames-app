@@ -16,7 +16,7 @@ function Card({started = false, colorMap, borderColorMap, isOwner, isOwnerTurn, 
                 border: `1px solid ${borderColorMap[teamIndex]}`
             }}>
                 <div className="card-text">{word}</div>
-                {votes !== undefined && <div className="card-votes">0</div>}
+                {votes !== undefined && <div className="card-votes">{votes.length}</div>}
             </div>
         );
     } else {

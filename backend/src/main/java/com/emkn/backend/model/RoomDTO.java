@@ -15,6 +15,8 @@ public class RoomDTO {
     private List<WordDTO> words = new ArrayList<>();
     private List<TeamDTO> teams = new ArrayList<>();
     private boolean isStarted = false;
+
+    private boolean isEnded = false;
     private Map<String, Boolean> readyStatus = new HashMap<>();
     private Map<String, UserDTO> spectators = new HashMap<>();
     private List<ChatMessageDTO> chatHistory = new ArrayList<>();
@@ -121,6 +123,26 @@ public class RoomDTO {
 
     public boolean isOwnerTurn() {
         return ownerTurn;
+    }
+
+    public boolean isEnded() {
+        return isEnded;
+    }
+
+    public void setEnded(boolean ended) {
+        isEnded = ended;
+    }
+
+    public TeamDTO calcShouldEnd(){
+        for(TeamDTO team : teams){
+            WordDTO wordDTO = getUnusedWordForTeams(team.getId());
+
+            if(wordDTO == null){
+                return team;
+            }
+        }
+
+        return null;
     }
 
     public WordDTO getUnusedWordForTeams(int index) {

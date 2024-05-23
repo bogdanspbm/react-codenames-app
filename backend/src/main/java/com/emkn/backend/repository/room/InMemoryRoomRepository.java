@@ -175,9 +175,27 @@ public class InMemoryRoomRepository implements RoomRepository {
         }, 0, 1000);
     }
 
+    private void endGame(RoomDTO room, TeamDTO team,  SimpMessagingTemplate messagingTemplate){
+        room.setEnded(true);
+        ChatMessageDTO logMessage = new ChatMessageDTO();
+        logMessage.setSender("System");
+        logMessage.setContent("Игра закончена. Победила команда: " + team.getName());
+        logMessage.setRoomId(room.getId());
+        room.getChatHistory().add(logMessage);
+        messagingTemplate.convertAndSend("/topic/messages", logMessage);
+        messagingTemplate.convertAndSend("/topic/room/" + room.getId(), room);
+    }
+
     private void startTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
         RoomDTO room = rooms.get(roomId);
         if (room == null) return;
+
+        TeamDTO team = room.calcShouldEnd();
+        if(team != null){
+            endGame(room, team,messagingTemplate);
+            return;
+        }
+
 
         room.incrementTurn();
 
