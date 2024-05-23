@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Card({isOwner, isOwnerTurn, word, teamIndex, votes, onVote}) {
+function Card({isOwner, isOwnerTurn, word, teamIndex, votes, onVote, isSelected = false}) {
     const handleVote = () => {
         if (onVote) {
             onVote(word);
@@ -23,7 +23,7 @@ function Card({isOwner, isOwnerTurn, word, teamIndex, votes, onVote}) {
         4: "#722ed1"
     }
 
-    if (isOwner) {
+    if (isOwner || isSelected) {
         return (
             <div className={`card`} style={{background : colorMap[teamIndex], border: `1px solid ${borderColorMap[teamIndex]}`}}>
                 <p>{word}</p>

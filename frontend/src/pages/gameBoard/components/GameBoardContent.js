@@ -112,7 +112,7 @@ const GameBoardContent = () => {
     return (
         <div className="game-board">
             <TeamPanel started={room.started} teams={room.teams} spectators={room.spectators} onJoinTeam={handleJoinTeam} />
-            <GameGrid votesMap={room.voteCounts} words={room.words} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} onVote={turnType === 'member' ? handleVote : null} />
+            <GameGrid votesMap={room.voteCounts} selectedWords={room.selectedWords} words={room.words} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} onVote={turnType === 'member' ? handleVote : null} />
             <ReadyButton room={room} />
             <Chat roomId={id} inMessages={room.chatHistory} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} />
             {room.started ? (

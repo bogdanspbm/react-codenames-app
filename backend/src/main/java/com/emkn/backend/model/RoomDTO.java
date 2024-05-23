@@ -25,7 +25,7 @@ public class RoomDTO {
     // Новые поля для голосования
     private Map<String, List<String>> wordVotes = new HashMap<>();
     private Map<String, Integer> userVotes = new HashMap<>();
-    private List<String> selectedWords = new ArrayList<>();
+    private Map<String, Boolean> selectedWords = new HashMap<>();
 
     // Getters and Setters
 
@@ -129,7 +129,7 @@ public class RoomDTO {
         return wordVotes;
     }
 
-    public List<String> getSelectedWords() {
+    public Map<String, Boolean> getSelectedWords() {
         return selectedWords;
     }
 
@@ -168,14 +168,19 @@ public class RoomDTO {
         wordVotes.clear();
     }
 
-    public void selectWords(int count) {
+    public  List<String> selectWords(int count) {
         List<Map.Entry<String, List<String>>> entries = new ArrayList<>(wordVotes.entrySet());
 
         entries.sort((e1, e2) -> Integer.compare(e2.getValue().size(), e1.getValue().size()));
 
+        List<String> output = new ArrayList<>();
+
         for (int i = 0; i < Math.min(count, entries.size()); i++) {
-            selectedWords.add(entries.get(i).getKey());
+            output.add(entries.get(i).getKey());
+            selectedWords.put(entries.get(i).getKey(), true);
         }
+
+        return output;
     }
 
     public static Map<Integer, RoomDTO> generateTemplates() {

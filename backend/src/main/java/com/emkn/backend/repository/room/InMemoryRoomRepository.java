@@ -252,8 +252,8 @@ public class InMemoryRoomRepository implements RoomRepository {
         // Логика для обработки хода участников команды
         TeamDTO currentTeam = room.getTeams().get(room.getCurrentTeamIndex());
         int count = room.getOwnerNumber(); // Предполагается, что у нас есть способ получить число от владельца команды
-        room.selectWords(count);
-        String messageContent = currentTeam.getName() + " выбрала слова: " + String.join(", ", room.getSelectedWords());
+        List<String> words = room.selectWords(count);
+        String messageContent = currentTeam.getName() + " выбрала слова: " + String.join(", ", words);
 
         ChatMessageDTO logMessage = new ChatMessageDTO();
         logMessage.setSender("System");
