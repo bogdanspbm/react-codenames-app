@@ -1,0 +1,12 @@
+.header{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    left: 0px;
+    max-height: 48px;
+
+    display: flex;
+    flex-direction: row;
+
+    overflow: hidden;
+}

@@ -1,0 +1,24 @@
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.game-room {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 10px;
+    width: 45%;
+    text-align: center;
+    border-radius: 8px;
+    background-color: #fafafa;
+    cursor: pointer;
+}
+
+.game-room:hover {
+    background-color: #e6f7ff;
+    border-color: #1890ff;
+}

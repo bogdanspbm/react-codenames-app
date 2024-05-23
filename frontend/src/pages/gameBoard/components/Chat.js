@@ -3,6 +3,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import '../styles/Chat.css';
 
 const Chat = ({ roomId, inMessages = [], isOwnerTurn, isOwner }) => {
     const [messages, setMessages] = useState(inMessages);

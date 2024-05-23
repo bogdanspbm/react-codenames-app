@@ -3,7 +3,8 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import GameGrid from './GameGrid';
-import Chat from './Chat';
+import Header from './Header';
+import Footer from "./Footer";
 import TeamPanel from './TeamPanel';
 import ReadyButton from './ReadyButton';
 import { Client } from '@stomp/stompjs';
@@ -15,6 +16,26 @@ const GameBoardContent = () => {
     const [countdown, setCountdown] = useState(null);
     const [turnType, setTurnType] = useState(null);
     const token = Cookies.get('token');
+
+    const colorMap = {
+        default: "#fafafa",
+        0: "#73d13d",
+        1: "#ff4d4f",
+        2: "#4096ff",
+        3: "#ffec3d",
+        4: "#9254de",
+        5: "#262626"
+    }
+
+    const borderColorMap = {
+        default: "#d9d9d9",
+        0: "#52c41a",
+        1: "#f5222d",
+        2: "#1677ff",
+        3: "#fadb14",
+        4: "#722ed1",
+        5: "#141414"
+    }
 
     useEffect(() => {
         const fetchRoom = async () => {
@@ -111,23 +132,9 @@ const GameBoardContent = () => {
 
     return (
         <div className="game-board">
-            <TeamPanel started={room.started} teams={room.teams} spectators={room.spectators} onJoinTeam={handleJoinTeam} />
-            <GameGrid votesMap={room.voteCounts} selectedWords={room.selectedWords} words={room.words} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} onVote={turnType === 'member' ? handleVote : null} />
-            <ReadyButton room={room} />
-            <Chat roomId={id} inMessages={room.chatHistory} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} />
-            {room.started ? (
-                <div className="game-status">Game Started</div>
-            ) : (
-                countdown !== null && <div className="countdown">Game starts in: {countdown}</div>
-            )}
-            {turnType && (
-                <div className="turn-status">
-                    {turnType === 'owner' ? 'Owner turn in progress' : 'Member turn in progress'}
-                </div>
-            )}
-            {countdown !== null && turnType && (
-                <div className="turn-countdown">Turn ends in: {countdown}</div>
-            )}
+            <Header colorMap={colorMap} borderColorMap={borderColorMap} room={room} turnType={turnType} countdown={countdown} handleJoinTeam={handleJoinTeam}></Header>
+            <GameGrid colorMap={colorMap} borderColorMap={borderColorMap} votesMap={room.voteCounts} selectedWords={room.selectedWords} words={room.words} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} onVote={turnType === 'member' ? handleVote : null} />
+            <Footer id={id} room={room} ></Footer>
         </div>
     );
 };
