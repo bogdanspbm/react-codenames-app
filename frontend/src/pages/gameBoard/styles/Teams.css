@@ -3,25 +3,58 @@
     flex-direction: row;
     justify-content: start;
     gap: 10px;
-    width: 100%;
+    width: fit-content;
+    margin-right: auto;
+}
+
+.team-container {
+    width: fit-content;
+    display: grid;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fafafa;
+    border: 1px solid #cccccc;
 }
 
 .team-info {
+    width: fit-content;
+    grid-column: 1 / 1 ;
+    grid-row: 1 / 1;
+
+    margin: 10px;
+    margin-top: 9px;
+
     gap: 8px;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: start;
-    width: 20%;
-    padding: 10px;
     text-align: center;
-    border-radius: 8px;
-    background-color: #fafafa;
-    border: 1px solid #cccccc;
 }
 
 .team-info-text {
     color: #4c4c4c;
     font-size: 24px;
     font-weight: 800;
+}
+
+.join-team-button {
+    grid-column: 1 /1;
+    grid-row: 1 / 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: transparent;
+    font-size: 24px;
+    font-weight: 800;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+
+.join-team-button:hover {
+    color: white;
+    background: var(--fill-color);
 }

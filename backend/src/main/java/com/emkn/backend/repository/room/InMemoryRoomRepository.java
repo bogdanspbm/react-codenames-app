@@ -136,6 +136,11 @@ public class InMemoryRoomRepository implements RoomRepository {
             }
         }
 
+        if(counter == 0){
+            stopCountdown(roomId);
+            return;
+        }
+
         if (counter == membersList.size()) {
             startCountdown(roomId, messagingTemplate);
         } else {

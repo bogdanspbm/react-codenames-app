@@ -1,5 +1,6 @@
 import React from 'react';
 import TeamInfo from "./TeamInfo";
+
 import '../styles/Teams.css';
 
 const TeamPanel = ({room, started = false, colorMap, borderColorMap, teams, spectators, onJoinTeam }) => {
