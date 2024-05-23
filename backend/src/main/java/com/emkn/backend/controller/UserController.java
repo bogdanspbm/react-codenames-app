@@ -26,13 +26,14 @@ public class UserController {
     }
 
     @PostMapping("/public/login")
-    public Map<String, String> loginUser(@RequestBody UserDTO userDTO) {
+    public Map<String, String> loginUser(@RequestBody UserDTO userDTO, HttpServletResponse response) {
         UserDTO authenticatedUser = userRepository.authenticate(userDTO.getUsername(), userDTO.getPassword());
         if (authenticatedUser != null) {
             String token = JWTTokenProvider.generateToken(authenticatedUser);
             return Collections.singletonMap("token", token);
         } else {
-            throw new RuntimeException("Invalid username or password");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return Collections.singletonMap("error", "Invalid password");
         }
     }
 

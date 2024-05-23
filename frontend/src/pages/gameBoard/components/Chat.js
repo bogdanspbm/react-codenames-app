@@ -103,8 +103,6 @@ const Chat = ({ roomId, inMessages = [], isOwnerTurn, isOwner }) => {
         }
     };
 
-    console.log(isOwner);
-    console.log(isOwnerTurn);
 
     return (
         <div className="chat">

@@ -64,7 +64,6 @@ const GameBoardContent = () => {
                 console.log('Connected to WebSocket server');
                 stompClient.subscribe(`/topic/room/${id}`, (message) => {
                     const updatedRoom = JSON.parse(message.body);
-                    console.log(updatedRoom);
                     setRoom(updatedRoom);
                 });
                 stompClient.subscribe(`/topic/countdown/${id}`, (message) => {
@@ -131,7 +130,6 @@ const GameBoardContent = () => {
         return <div>Loading...</div>;
     }
 
-    console.log(room)
 
     return (
         <div className="game-board">
