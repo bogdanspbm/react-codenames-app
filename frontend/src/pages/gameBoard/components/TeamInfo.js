@@ -1,4 +1,7 @@
 import React from 'react';
+import { ReactComponent as UsersIcon } from "../icons/ic_users_16x16.svg"
+import { ReactComponent as WordIcon } from "../icons/ic_words_16x16.svg"
+
 
 const TeamInfo = ({started, inTeam, onJoinTeam, colorMap, borderColorMap}) => {
 
@@ -15,6 +18,8 @@ const TeamInfo = ({started, inTeam, onJoinTeam, colorMap, borderColorMap}) => {
                     Join {inTeam.name}
                 </button>
             )}
+            <UsersIcon fill={"#242424"} style={{marginLeft: "auto"}}></UsersIcon>
+            <WordIcon fill={"#242424"}></WordIcon>
         </div>
     );
 };
