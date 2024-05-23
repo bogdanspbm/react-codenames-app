@@ -1,14 +1,14 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.2.5"
+    id("org.springframework.boot") version "2.7.8"
     id("io.spring.dependency-management") version "1.1.4"
 }
 
 group = "com.emkn"
-version = "0.0.1-SNAPSHOT"
+version = "release"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
@@ -36,6 +36,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("javax.persistence:javax.persistence-api:2.2")
+
 
 
     // Test

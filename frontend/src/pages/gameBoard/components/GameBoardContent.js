@@ -53,7 +53,8 @@ const GameBoardContent = () => {
 
         fetchRoom();
 
-        const socket = new SockJS('http://localhost:8080/ws');
+        const socketUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080/ws' : '/ws';
+        const socket = new SockJS(socketUrl);
         const stompClient = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,

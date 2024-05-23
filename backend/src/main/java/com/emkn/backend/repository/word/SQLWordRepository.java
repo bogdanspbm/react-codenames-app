@@ -2,7 +2,6 @@ package com.emkn.backend.repository.word;
 
 import com.emkn.backend.datastore.DataStore;
 import com.emkn.backend.datastore.SQLDataStore;
-import com.emkn.backend.model.UserDTO;
 import com.emkn.backend.model.WordDTO;
 
 import java.sql.PreparedStatement;
