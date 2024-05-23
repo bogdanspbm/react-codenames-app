@@ -89,6 +89,8 @@ public class InMemoryRoomRepository implements RoomRepository {
     @Override
     public void joinTeam(int roomId, UserDTO user, int teamId) {
         RoomDTO room = rooms.get(roomId);
+        room.setReadyStatus(new HashMap<>());
+
         if (room == null || room.isStarted()) {
           return;
         }
@@ -177,6 +179,8 @@ public class InMemoryRoomRepository implements RoomRepository {
         RoomDTO room = rooms.get(roomId);
         if (room == null) return;
 
+        room.incrementTurn();
+
         Timer timer = new Timer();
         countdownTimers.put(roomId, timer);
 
@@ -220,7 +224,7 @@ public class InMemoryRoomRepository implements RoomRepository {
 
         // Логика для завершения хода владельца команды
         TeamDTO currentTeam = room.getTeams().get(room.getCurrentTeamIndex());
-        if (!room.getOwnerMessages().isEmpty()) {
+        if (!room.getOwnerMessages().isEmpty() && room.hasUnusedOwnerMessage()) {
             OwnerMessageDTO lastOwnerMessage = room.getOwnerMessages().get(room.getOwnerMessages().size() - 1);
             String owner = lastOwnerMessage.getUsername();
             String messageContent = owner + " назвал слово: " + lastOwnerMessage.getWord() + " и число: " + lastOwnerMessage.getNumber();
@@ -283,18 +287,8 @@ public class InMemoryRoomRepository implements RoomRepository {
             return;
         }
 
+        message.setTurnNumber(room.getTurn());
         room.getOwnerMessages().add(message);
-
-        TeamDTO currentTeam = room.getTeams().get(room.getCurrentTeamIndex());
-        String messageContent = message.getUsername() + " назвал слово: " + message.getWord() + " и число: " + message.getNumber();
-
-        ChatMessageDTO logMessage = new ChatMessageDTO();
-        logMessage.setSender("System");
-        logMessage.setContent(messageContent);
-        logMessage.setRoomId(roomId);
-        room.getChatHistory().add(logMessage);
-        messagingTemplate.convertAndSend("/topic/messages", logMessage);
-
         endOwnerTurn(roomId, messagingTemplate);
     }
 

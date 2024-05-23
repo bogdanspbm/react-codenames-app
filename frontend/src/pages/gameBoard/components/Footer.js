@@ -4,9 +4,9 @@ import React from "react";
 import '../styles/Footer.css';
 
 
-const Footer = ({id, room, turnType  }) => {
+const Footer = ({id, room, isOwnerTurn  }) => {
     return (<div className={"footer"}>
-        <Chat roomId={id} inMessages={room.chatHistory} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} />
+        <Chat roomId={id} inMessages={room.chatHistory} isOwnerTurn={isOwnerTurn} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} />
     </div>)
 }
 

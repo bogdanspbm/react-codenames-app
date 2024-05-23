@@ -2,18 +2,29 @@ package com.emkn.backend.model;
 
 public class OwnerMessageDTO {
     private int teamIndex;
+
+    private int turnNumber = 0;
     private String username;
     private String word;
     private int number;
 
-    public OwnerMessageDTO() {
+    private boolean isUsed = false;
+
+
+    public boolean isUsed() {
+        return isUsed;
     }
 
-    public OwnerMessageDTO(int teamIndex, String username, String word, int number) {
-        this.teamIndex = teamIndex;
-        this.username = username;
-        this.word = word;
-        this.number = number;
+    public void setUsed(boolean used) {
+        isUsed = used;
+    }
+
+    public int getTurnNumber() {
+        return turnNumber;
+    }
+
+    public void setTurnNumber(int turnNumber) {
+        this.turnNumber = turnNumber;
     }
 
     public int getTeamIndex() {

@@ -8,18 +8,22 @@ function Card({started = false, colorMap, borderColorMap, isOwner, isOwnerTurn, 
     };
 
 
-    if (started && (isOwner || isSelected)) {
+    if ( started && (isOwner || isSelected)) {
         return (
-            <div className={`card`} style={{color: "white", background : colorMap[teamIndex], border: `1px solid ${borderColorMap[teamIndex]}`}}>
-                <p>{word}</p>
-                {votes !== undefined && <p>Votes: {votes}</p>}
+            <div className={`card`} style={{
+                color: "white",
+                background: colorMap[teamIndex],
+                border: `1px solid ${borderColorMap[teamIndex]}`
+            }}>
+                <div className="card-text">{word}</div>
+                {votes !== undefined && <div className="card-votes">0</div>}
             </div>
         );
     } else {
         return (
             <div className={isOwnerTurn ? `card button-disabled` : `card button-enabled`} onClick={handleVote}>
-                <p>{word}</p>
-                {votes !== undefined && <p>Votes: {votes}</p>}
+                <div className="card-text">{word}</div>
+                {votes !== undefined && <div className="card-votes">{votes.length}</div>}
             </div>
         );
     }

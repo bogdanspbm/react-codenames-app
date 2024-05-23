@@ -102,6 +102,9 @@ const Chat = ({ roomId, inMessages = [], isOwnerTurn, isOwner }) => {
         }
     };
 
+    console.log(isOwner);
+    console.log(isOwnerTurn);
+
     return (
         <div className="chat">
             <div className="chat-window">
@@ -118,6 +121,7 @@ const Chat = ({ roomId, inMessages = [], isOwnerTurn, isOwner }) => {
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type a message"
                 />
+
                 {isOwner && isOwnerTurn && (
                     <input
                         type="number"

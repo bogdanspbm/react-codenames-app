@@ -8,6 +8,8 @@ import java.util.Map;
 public class RoomDTO {
     private int id = -1;
     private String name = "";
+
+    private int turn = 0;
     private int teamCount = 2;
     private String language = "Russian";
     private List<WordDTO> words = new ArrayList<>();
@@ -137,6 +139,27 @@ public class RoomDTO {
         return ownerMessages;
     }
 
+    public boolean hasUnusedOwnerMessage() {
+        if (ownerMessages.isEmpty()) {
+            return false;
+        }
+
+        return !ownerMessages.get(ownerMessages.size() - 1).isUsed();
+    }
+
+    public int getTurn() {
+        return turn;
+    }
+
+    public int incrementTurn() {
+        this.turn += 1;
+        return turn;
+    }
+
+    public void setTurn(int turn) {
+        this.turn = turn;
+    }
+
     // Методы для голосования
     public void addVote(String word, String username, int limit) {
         if (!wordVotes.containsKey(word) || wordVotes.get(word) == null) {
@@ -168,7 +191,7 @@ public class RoomDTO {
         wordVotes.clear();
     }
 
-    public  List<String> selectWords(int count) {
+    public List<String> selectWords(int count) {
         List<Map.Entry<String, List<String>>> entries = new ArrayList<>(wordVotes.entrySet());
 
         entries.sort((e1, e2) -> Integer.compare(e2.getValue().size(), e1.getValue().size()));
@@ -197,9 +220,17 @@ public class RoomDTO {
 
     // Метод для получения последнего числа от владельца команды
     public int getOwnerNumber() {
-        if (!ownerMessages.isEmpty()) {
+        if (!ownerMessages.isEmpty() && !ownerMessages.get(ownerMessages.size() - 1).isUsed()) {
             return ownerMessages.get(ownerMessages.size() - 1).getNumber();
         }
         return 0; // Возвращаем 0, если нет сообщений от владельца
+    }
+
+    public void setOwnerMessageUsed() {
+        if (ownerMessages.isEmpty()) {
+            return;
+        }
+
+        ownerMessages.get(ownerMessages.size() - 1).setUsed(true);
     }
 }

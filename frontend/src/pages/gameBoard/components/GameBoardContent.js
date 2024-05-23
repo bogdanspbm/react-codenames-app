@@ -130,11 +130,13 @@ const GameBoardContent = () => {
         return <div>Loading...</div>;
     }
 
+    console.log(room)
+
     return (
         <div className="game-board">
             <Header colorMap={colorMap} borderColorMap={borderColorMap} room={room} turnType={turnType} countdown={countdown} handleJoinTeam={handleJoinTeam}></Header>
-            <GameGrid started={room.started} colorMap={colorMap} borderColorMap={borderColorMap} votesMap={room.voteCounts} selectedWords={room.selectedWords} words={room.words} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} onVote={turnType === 'member' ? handleVote : null} />
-            <Footer id={id} room={room} ></Footer>
+            <GameGrid started={room.started} colorMap={colorMap} borderColorMap={borderColorMap} votesMap={room.voteCounts} selectedWords={room.selectedWords} words={room.words} isOwnerTurn={room.ownerTurn} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} onVote={turnType === 'member' ? handleVote : null} />
+            <Footer isOwnerTurn={room.ownerTurn} id={id} room={room} ></Footer>
         </div>
     );
 };
