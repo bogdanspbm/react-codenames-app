@@ -264,7 +264,6 @@ public class InMemoryRoomRepository implements RoomRepository {
 
         room.setOwnerTurn(true);
         room.setCurrentTeamIndex((room.getCurrentTeamIndex() + 1) % room.getTeams().size());
-        room.clearSelectedWords(); // Очистка выбранных слов после хода
         messagingTemplate.convertAndSend("/topic/room/" + roomId, room);
         startTurn(roomId, messagingTemplate);
     }

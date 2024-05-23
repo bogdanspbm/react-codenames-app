@@ -178,10 +178,6 @@ public class RoomDTO {
         }
     }
 
-    public void clearSelectedWords() {
-        selectedWords.clear();
-    }
-
     public static Map<Integer, RoomDTO> generateTemplates() {
         Map<Integer, RoomDTO> output = new HashMap<>();
 
