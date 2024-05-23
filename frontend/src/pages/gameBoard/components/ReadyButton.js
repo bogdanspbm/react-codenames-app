@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import '../styles/ReadyButton.css';
 
-const ReadyButton = ({ room = {} }) => {
+const ReadyButton = ({turnType, countdown, room = {}}) => {
     const [isReady, setIsReady] = useState(false);
     const token = Cookies.get('token');
 
@@ -25,14 +26,39 @@ const ReadyButton = ({ room = {} }) => {
 
     const handleReadyClick = () => {
         axios.post(`/api/v1/private/rooms/${room.id}/ready`, {}, {
-            params: { ready: !isReady },
-            headers: { Authorization: `Bearer ${token}` },
+            params: {ready: !isReady},
+            headers: {Authorization: `Bearer ${token}`},
         }).then(response => {
             const room = response.data;
             setIsReady(!isReady);
         }).catch(error => {
             console.error('Error setting ready status:', error);
         });
+    };
+
+    const areAllReady = () => {
+        const membersList = [];
+
+        for (let teamIndex in room.teams) {
+            const team = room.teams[teamIndex];
+            for (let memberIndex in team.members) {
+                const member = team.members[memberIndex];
+                membersList.push(member.username);
+            }
+        }
+
+        let counter = 0;
+
+        for (let memberIndex in membersList) {
+            const member = membersList[memberIndex];
+            if (!room.readyStatus[member]) {
+                continue;
+            }
+
+            counter += 1;
+        }
+
+        return counter === membersList.length;
     };
 
     const calcReadyCount = () => {
@@ -60,14 +86,21 @@ const ReadyButton = ({ room = {} }) => {
         return `${counter}/${membersList.length}`;
     };
 
-    return (
-        <div className="ready-button">
-            <button onClick={handleReadyClick}>
-                {isReady ? 'Cancel Ready' : 'Ready'}
-            </button>
-            <p>{calcReadyCount()} players ready</p>
-        </div>
-    );
+    if (!room.started) {
+        return (
+            <div className="ready-button-container">
+                {countdown !== null && areAllReady() ?
+                    <div className="ready-info">Starts in: {countdown}</div>
+                    : <div className="ready-info">{calcReadyCount()} players ready</div>}
+                <div className="ready-button" onClick={handleReadyClick}> {isReady ? 'Cancel Ready' : 'Ready'} </div>
+            </div>
+        );
+    }
+
+    return <div className="ready-button-container">
+        {countdown !== null && <div className="ready-info">Turn ends in: {countdown}</div>}
+    </div>
+
 };
 
 export default ReadyButton;

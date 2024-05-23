@@ -1,0 +1,42 @@
+.ready-button-container{
+    display: grid;
+    position: absolute;
+    left: calc(50vw - 100px);
+    width: 200px;
+    height: 46px;
+    border-radius: 8px;
+    background-color: #fafafa;
+    border: 1px solid #cccccc;
+
+    overflow: hidden;
+
+    font-weight: 800;
+    font-size: 24px;
+    color: #4c4c4c;
+}
+
+.ready-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-row: 1;
+    grid-column: 1;
+
+    color: transparent;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.ready-button:hover {
+    color: white;
+    background: #4c4c4c;
+}
+
+.ready-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-row: 1;
+    grid-column: 1;
+
+}
