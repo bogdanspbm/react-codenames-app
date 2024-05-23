@@ -296,7 +296,7 @@ public class InMemoryRoomRepository implements RoomRepository {
 
     // Новый метод для обработки голосования участников
     @Override
-    public void voteForWord(int roomId, String word, String username) {
+    public void voteForWord(int roomId, String word, String username, SimpMessagingTemplate messagingTemplate) {
         RoomDTO room = rooms.get(roomId);
         if (room == null || room.isOwnerTurn()) {
             return;
@@ -304,8 +304,10 @@ public class InMemoryRoomRepository implements RoomRepository {
 
         TeamDTO currentTeam = room.getTeams().get(room.getCurrentTeamIndex());
         if (currentTeam.getMembers().containsKey(username)) {
-            room.addVote(word);
+            room.addVote(word, username, room.getOwnerNumber());
         }
+
+        messagingTemplate.convertAndSend("/topic/room/" + roomId, room);
     }
 
     private void stopCountdown(int roomId) {

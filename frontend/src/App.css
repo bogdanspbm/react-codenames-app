@@ -224,3 +224,8 @@ form button:hover {
 .auth-form button {
   margin-bottom: 10px;
 }
+
+.button-enabled:hover{
+  border: 1px solid #1677ff;
+  background: #e6f4ff;
+}

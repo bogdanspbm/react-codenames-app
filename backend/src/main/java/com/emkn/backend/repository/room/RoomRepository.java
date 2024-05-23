@@ -16,7 +16,7 @@ public interface RoomRepository {
 
     void setReadyStatus(int roomId, String userName, boolean isReady, SimpMessagingTemplate messagingTemplate);
 
-    void voteForWord(int roomId, String word, String username);
+    void voteForWord(int roomId, String word, String username, SimpMessagingTemplate messagingTemplate);
 
     void addOwnerMessage(int roomId, OwnerMessageDTO message, SimpMessagingTemplate messagingTemplate);
 

@@ -23,7 +23,8 @@ public class RoomDTO {
     private List<OwnerMessageDTO> ownerMessages = new ArrayList<>();
 
     // Новые поля для голосования
-    private Map<String, Integer> voteCounts = new HashMap<>();
+    private Map<String, List<String>> wordVotes = new HashMap<>();
+    private Map<String, Integer> userVotes = new HashMap<>();
     private List<String> selectedWords = new ArrayList<>();
 
     // Getters and Setters
@@ -124,8 +125,8 @@ public class RoomDTO {
         this.ownerTurn = ownerTurn;
     }
 
-    public Map<String, Integer> getVoteCounts() {
-        return voteCounts;
+    public Map<String, List<String>> getVoteCounts() {
+        return wordVotes;
     }
 
     public List<String> getSelectedWords() {
@@ -137,20 +138,44 @@ public class RoomDTO {
     }
 
     // Методы для голосования
-    public void addVote(String word) {
-        voteCounts.put(word, voteCounts.getOrDefault(word, 0) + 1);
+    public void addVote(String word, String username, int limit) {
+        if (!wordVotes.containsKey(word) || wordVotes.get(word) == null) {
+            wordVotes.put(word, new ArrayList<>());
+        }
+
+        if (!userVotes.containsKey(username)) {
+            userVotes.put(username, 0);
+        }
+
+        List<String> votes = wordVotes.get(word);
+        if (votes.isEmpty() && userVotes.get(username) < limit) {
+            votes.add(username);
+            userVotes.put(username, userVotes.get(username) + 1);
+            return;
+        }
+
+        if (votes.contains(username)) {
+            userVotes.put(username, userVotes.get(username) - 1);
+            votes.remove(username);
+        } else if (userVotes.get(username) < limit) {
+            userVotes.put(username, userVotes.get(username) + 1);
+            votes.add(username);
+        }
     }
 
     public void clearVotes() {
-        voteCounts.clear();
+        userVotes.clear();
+        wordVotes.clear();
     }
 
     public void selectWords(int count) {
-        selectedWords.clear();
-        voteCounts.entrySet().stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(count)
-                .forEach(entry -> selectedWords.add(entry.getKey()));
+        List<Map.Entry<String, List<String>>> entries = new ArrayList<>(wordVotes.entrySet());
+
+        entries.sort((e1, e2) -> Integer.compare(e2.getValue().size(), e1.getValue().size()));
+
+        for (int i = 0; i < Math.min(count, entries.size()); i++) {
+            selectedWords.add(entries.get(i).getKey());
+        }
     }
 
     public void clearSelectedWords() {

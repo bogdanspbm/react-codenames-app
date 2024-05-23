@@ -9,7 +9,7 @@ import ReadyButton from './ReadyButton';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
-const GameBoardContent = ({username}) => {
+const GameBoardContent = () => {
     const { id } = useParams();
     const [room, setRoom] = useState(null);
     const [countdown, setCountdown] = useState(null);
@@ -42,6 +42,7 @@ const GameBoardContent = ({username}) => {
                 console.log('Connected to WebSocket server');
                 stompClient.subscribe(`/topic/room/${id}`, (message) => {
                     const updatedRoom = JSON.parse(message.body);
+                    console.log(updatedRoom);
                     setRoom(updatedRoom);
                 });
                 stompClient.subscribe(`/topic/countdown/${id}`, (message) => {
@@ -90,9 +91,17 @@ const GameBoardContent = ({username}) => {
             params: { teamId },
             headers: { Authorization: `Bearer ${token}` },
         }).then(response => {
-            setRoom(response.data);
+            setRoom(response.data);}).catch(error => {
+            console.error('Error voting for word:', error);
+        });
+    };
+
+    const handleVote = (word) => {
+        axios.post(`/api/v1/private/rooms/${id}/vote`, {}, {
+            params: { word },
+            headers: { Authorization: `Bearer ${token}` },
         }).catch(error => {
-            console.error('Error joining team:', error);
+            console.error('Error voting for word:', error);
         });
     };
 
@@ -100,13 +109,12 @@ const GameBoardContent = ({username}) => {
         return <div>Loading...</div>;
     }
 
-
     return (
         <div className="game-board">
             <TeamPanel started={room.started} teams={room.teams} spectators={room.spectators} onJoinTeam={handleJoinTeam} />
-            <GameGrid words={room.words} />
+            <GameGrid votesMap={room.voteCounts} words={room.words} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} onVote={turnType === 'member' ? handleVote : null} />
             <ReadyButton room={room} />
-            <Chat roomId={id} inMessages={room.chatHistory} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === username)} />
+            <Chat roomId={id} inMessages={room.chatHistory} isOwnerTurn={room.ownerTurn && turnType === 'owner'} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} />
             {room.started ? (
                 <div className="game-status">Game Started</div>
             ) : (

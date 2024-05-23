@@ -157,7 +157,7 @@ public class RoomController {
 
         if (token != null && JWTTokenProvider.validateToken(token.substring(7))) {
             String username = JWTTokenProvider.getUsernameFromToken(token.substring(7));
-            roomRepository.voteForWord(id, word, username);
+            roomRepository.voteForWord(id, word, username, messagingTemplate);
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
