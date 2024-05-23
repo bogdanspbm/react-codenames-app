@@ -1,9 +1,9 @@
 .ready-button-container{
     display: grid;
     position: absolute;
-    left: calc(50vw - 100px);
-    width: 200px;
-    height: 46px;
+    left: calc(45vw);
+    width: 10vw;
+    height: fit-content;
     border-radius: 8px;
     background-color: #fafafa;
     border: 1px solid #cccccc;
@@ -11,7 +11,7 @@
     overflow: hidden;
 
     font-weight: 800;
-    font-size: 24px;
+    font-size: 1vw;
     color: #4c4c4c;
 }
 
@@ -33,6 +33,7 @@
 }
 
 .ready-info {
+    margin: 10px;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -7,6 +7,10 @@
     margin-right: auto;
 }
 
+h2 {
+    font-size: 1vw;
+}
+
 .team-container {
     width: fit-content;
     display: grid;
@@ -22,7 +26,6 @@
     grid-row: 1 / 1;
 
     margin: 10px;
-    margin-top: 9px;
 
     gap: 8px;
     display: flex;
@@ -34,7 +37,8 @@
 
 .team-info-text {
     color: #4c4c4c;
-    font-size: 24px;
+    font-size: 1vw;
+    line-height: 1vw;
     font-weight: 800;
 }
 
@@ -47,7 +51,8 @@
     justify-content: center;
     text-align: center;
     color: transparent;
-    font-size: 24px;
+    line-height: 1vw;
+    font-size: 1vw;
     font-weight: 800;
     transition: all 0.3s;
     cursor: pointer;
