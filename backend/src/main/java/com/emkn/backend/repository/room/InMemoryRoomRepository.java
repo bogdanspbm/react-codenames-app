@@ -324,6 +324,10 @@ public class InMemoryRoomRepository implements RoomRepository {
             return;
         }
 
+        if(!room.isUserNamesTurn(message.getUsername())){
+            return;
+        }
+
         message.setTurnNumber(room.getTurn());
         room.getOwnerMessages().add(message);
         endOwnerTurn(roomId, messagingTemplate);

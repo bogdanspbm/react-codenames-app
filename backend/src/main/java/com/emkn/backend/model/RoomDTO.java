@@ -33,6 +33,17 @@ public class RoomDTO {
 
     // Getters and Setters
 
+    public boolean isUserNamesTurn(String username){
+        TeamDTO team = getTeams().get(getCurrentTeamIndex());
+        for(UserDTO user : team.getMembers().values()){
+            if(user.getUsername() != null && user.getUsername().equals(username)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public int getId() {
         return id;
     }
