@@ -31,7 +31,7 @@ function CreateGameForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form className="create-game-form" onSubmit={handleSubmit}>
             <div>
                 <label>Room Name:</label>
                 <input
@@ -72,7 +72,7 @@ function CreateGameForm() {
                 />
             </div>
             <button type="submit">Create</button>
-            <button type="button" onClick={() => navigate(-1)}>Back</button>
+            <button className="button-back" type="button" onClick={() => navigate(-1)}>Back</button>
         </form>
     );
 }

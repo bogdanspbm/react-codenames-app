@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Cookies from 'js-cookie';
+import '../styles/Auth.css';
 
 function AuthForm({ isLoggedIn, username, onLogin, onLogout }) {
     const [formData, setFormData] = useState({ username: '', password: '' });

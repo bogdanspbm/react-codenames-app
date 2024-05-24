@@ -3,6 +3,7 @@ import MainMenuOptions from './components/MainMenuOptions';
 import AuthForm from './components/AuthForm';
 import Cookies from 'js-cookie';
 import '../../App.css';
+import './styles/MainMenu.css';
 
 function MainMenu({username, setUsername}) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -48,7 +49,7 @@ function MainMenu({username, setUsername}) {
     return (
         <div className="container">
             <div className="panel">
-                <h1>Main Menu</h1>
+                <h1>Codenames</h1>
                 <div className="main-menu">
                     <MainMenuOptions />
                 </div>

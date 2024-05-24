@@ -1,0 +1,44 @@
+.panel {
+    gap: 10px;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.panel h1 {
+    font-size: 2vw;
+    margin: 0;
+}
+
+.main-menu{
+    width: 100%;
+}
+
+.main-menu li a {
+    font-weight: 400;
+    color: white;
+}
+
+
+.main-menu li {
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 8px;
+
+    border-radius: 4px;
+    background: #1890ff;
+
+}
+
+.main-menu li:hover {
+    background: #1677ff;
+}

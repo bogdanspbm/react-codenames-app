@@ -1,0 +1,31 @@
+.create-game-container{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: white;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    padding: 20px;
+    min-width: 300px;
+}
+
+.create-game-form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.create-game-container h1{
+    margin: 0;
+}
+
+.button-back {
+    background: white;
+    color: #4c4c4c;
+    border: 1px solid #cccccc;
+}
+
+.button-back:hover{
+    color: #4c4c4c;
+    background: #F5F5F5;
+}
