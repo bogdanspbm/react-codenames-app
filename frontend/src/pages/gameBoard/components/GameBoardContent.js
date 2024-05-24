@@ -9,6 +9,7 @@ import TeamPanel from './TeamPanel';
 import ReadyButton from './ReadyButton';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import EndGamePopup from "./EndGamePopup";
 
 const GameBoardContent = () => {
     const { id } = useParams();
@@ -136,6 +137,7 @@ const GameBoardContent = () => {
             <Header colorMap={colorMap} borderColorMap={borderColorMap} room={room} turnType={turnType} countdown={countdown} handleJoinTeam={handleJoinTeam}></Header>
             <GameGrid started={room.started} colorMap={colorMap} borderColorMap={borderColorMap} votesMap={room.voteCounts} selectedWords={room.selectedWords} words={room.words} isOwnerTurn={room.ownerTurn} isOwner={room.teams.some(team => team.owner && team.owner.username === Cookies.get('username'))} onVote={turnType === 'member' ? handleVote : null} />
             <Footer isOwnerTurn={room.ownerTurn} id={id} room={room} ></Footer>
+            {room.ended && <EndGamePopup></EndGamePopup>}
         </div>
     );
 };

@@ -175,7 +175,7 @@ public class InMemoryRoomRepository implements RoomRepository {
         }, 0, 1000);
     }
 
-    private void endGame(RoomDTO room, TeamDTO team,  SimpMessagingTemplate messagingTemplate){
+    private void endGameTeamWin(RoomDTO room, TeamDTO team,  SimpMessagingTemplate messagingTemplate){
         room.setEnded(true);
         ChatMessageDTO logMessage = new ChatMessageDTO();
         logMessage.setSender("System");
@@ -186,14 +186,30 @@ public class InMemoryRoomRepository implements RoomRepository {
         messagingTemplate.convertAndSend("/topic/room/" + room.getId(), room);
     }
 
+    private void endGame(RoomDTO room, SimpMessagingTemplate messagingTemplate){
+        room.setEnded(true);
+        ChatMessageDTO logMessage = new ChatMessageDTO();
+        logMessage.setSender("System");
+        logMessage.setContent("Игра закончена. Закончилось число ходов.");
+        logMessage.setRoomId(room.getId());
+        room.getChatHistory().add(logMessage);
+        messagingTemplate.convertAndSend("/topic/messages", logMessage);
+        messagingTemplate.convertAndSend("/topic/room/" + room.getId(), room);
+    }
+
+
     private void startTurn(int roomId, SimpMessagingTemplate messagingTemplate) {
         RoomDTO room = rooms.get(roomId);
         if (room == null) return;
 
         TeamDTO team = room.calcShouldEnd();
         if(team != null){
-            endGame(room, team,messagingTemplate);
+            endGameTeamWin(room, team,messagingTemplate);
             return;
+        }
+
+        if(room.getTurn() > 100){
+            endGame(room, messagingTemplate);
         }
 
 
