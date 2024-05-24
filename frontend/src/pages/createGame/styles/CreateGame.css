@@ -20,6 +20,7 @@
 }
 
 .button-back {
+    width: 100%;
     background: white;
     color: #4c4c4c;
     border: 1px solid #cccccc;

@@ -47,7 +47,7 @@ function AuthForm({ isLoggedIn, username, onLogin, onLogout }) {
             {isLoggedIn ? (
                 <div>
                     <p>Welcome, {username}</p>
-                    <button onClick={() => {
+                    <button className="logout-button" onClick={() => {
                         onLogout();
                         Cookies.remove('token');
                     }}>Logout</button>

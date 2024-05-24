@@ -1,3 +1,8 @@
+.card-text {
+    grid-row: 1;
+    grid-column: 1;
+}
+
 .game-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -5,27 +10,6 @@
     flex-wrap: wrap;
     gap: 0.5vw;
     width: 100%;
-}
-
-.game-room {
-    border: 1px solid #ccc;
-    padding: 2vw;
-    margin: 1vw;
-    width: 45%;
-    text-align: center;
-    border-radius: 8px;
-    background-color: #fafafa;
-    cursor: pointer;
-}
-
-.game-room:hover {
-    background-color: #e6f7ff;
-    border-color: #1890ff;
-}
-
-.card-text {
-    grid-row: 1;
-    grid-column: 1;
 }
 
 .card-votes {
@@ -45,6 +29,7 @@
 }
 
 .card {
+    transition: all 0.3s;
     display: grid;
 
     align-items: center;

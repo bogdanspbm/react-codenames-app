@@ -4,7 +4,8 @@ import GameRoom from './GameRoom';
 
 function GameListDisplay() {
     const [rooms, setRooms] = useState([]);
-    const navigate = useNavigate();
+    const [filter, setFilter] = useState("");
+
 
     useEffect(() => {
         fetch('/api/v1/public/rooms')
@@ -13,11 +14,13 @@ function GameListDisplay() {
     }, []);
 
     return (
-        <div>
-            <input type="text" placeholder="Search by room name" className="search-input" />
-            <div className="game-grid">
+        <div className="vertical-container">
+            <input onChange={(event) => {
+               setFilter(event.target.value);
+            }} type="text" placeholder="Search by room name" className="search-input" />
+            <div className="game-list">
                 {rooms.map(room => (
-                    <GameRoom
+                    (!filter || room.name.toLowerCase().includes(filter.toLowerCase())) && <GameRoom
                         key={room.id}
                         roomName={room.name}
                         roomId={room.id}
@@ -26,7 +29,6 @@ function GameListDisplay() {
                     />
                 ))}
             </div>
-            <button type="button" onClick={() => navigate(-1)}>Back</button>
         </div>
     );
 }

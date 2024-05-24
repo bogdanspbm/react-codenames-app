@@ -38,6 +38,7 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    transition: all 0.3s;
 }
 
 .chat-input button:hover {

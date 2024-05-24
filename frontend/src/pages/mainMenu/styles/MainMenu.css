@@ -27,6 +27,7 @@
 
 .main-menu li {
     cursor: pointer;
+    transition: all 0.3s;
 
     display: flex;
     align-items: center;
